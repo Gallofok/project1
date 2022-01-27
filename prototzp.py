@@ -39,10 +39,10 @@ from stl import mesh
 # plt.show()
 
 
-#the second method using the average popints of the meshing triangle.
+#the second method using the average popints of the meshing triangle. The idea is to set the height value of the required coordinate point to the nearest meshvalue(height)
 your_mesh = mesh.Mesh.from_file('beispiellinse.stl')
-dmin = 200
 print(your_mesh.points.shape)
+#using  the center of meshing triangle
 centerofmeshtriangle_x = (your_mesh.points[:,0]+your_mesh.points[:,3]+your_mesh.points[:,6])/3
 centerofmeshtriangle_y = (your_mesh.points[:,1]+your_mesh.points[:,4]+your_mesh.points[:,7])/3
 centerofmeshtriangle_z = (your_mesh.points[:,2]+your_mesh.points[:,5]+your_mesh.points[:,8])/3
@@ -59,9 +59,10 @@ ymax = np.max(y_range)
 
 print(xmin,xmax)
 print(ymin,ymax)
-
+#in this position you can set the dx,and dy
 dx = 5
 dy = 5
+#this method find the inded of  meshtriangle ,which meet the requirements ,x<=0.3,y<=0.2
 def finddindex(a, b, meshcenter):
 
     for xid in range(len(meshcenter[0])):
@@ -73,6 +74,7 @@ xline = np.arange(xmin,xmax,dx)
 yline = np.arange(ymin,ymax,dy)
 
 meshc = np.stack((centerofmeshtriangle_x,centerofmeshtriangle_y,centerofmeshtriangle_z))
+# Z array stores the height information of given(x,y)  
 Z = np.ones((len(xline),len(yline)))
 xx,yy = np.meshgrid(xline,yline)
 for xi in range(len(xline)):
