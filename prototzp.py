@@ -9,6 +9,7 @@ import xml.etree.cElementTree as et
 import zipfile
 from stl import mesh
 
+
 # # Load the STL files and add the vectors to the plot
 
 # your_mesh = mesh.Mesh.from_file('beispiellinse.stl')
@@ -41,71 +42,44 @@ from stl import mesh
 
 # the second method using the average popints of the meshing triangle.
 
-#this is the process tp read stl file
-# your_mesh = mesh.Mesh.from_file('beispiellinse.stl')
-# dmin = 200
-# print(your_mesh.points.shape)
-# centerofmeshtriangle_x = (your_mesh.points[:, 0] + your_mesh.points[:, 3] + your_mesh.points[:, 6]) / 3
-# centerofmeshtriangle_y = (your_mesh.points[:, 1] + your_mesh.points[:, 4] + your_mesh.points[:, 7]) / 3
-# centerofmeshtriangle_z = (your_mesh.points[:, 2] + your_mesh.points[:, 5] + your_mesh.points[:, 8]) / 3
-# print(centerofmeshtriangle_x.shape)
-#
-# x_range = np.concatenate([your_mesh.points[:, 0], your_mesh.points[:, 3], your_mesh.points[:, 6]])
-# y_range = np.concatenate([your_mesh.points[:, 1], your_mesh.points[:, 4], your_mesh.points[:, 7]])
-# z_range = np.concatenate([your_mesh.points[:, 2], your_mesh.points[:, 5], your_mesh.points[:, 8]])
+# this is the process tp read stl file
+def readstlfile():
+    your_mesh = mesh.Mesh.from_file('beispiellinse.stl')
+
+    print(your_mesh.points.shape)
+    # centerofmeshtriangle_x = (your_mesh.points[:, 0] + your_mesh.points[:, 3] + your_mesh.points[:, 6]) / 3
+    # centerofmeshtriangle_y = (your_mesh.points[:, 1] + your_mesh.points[:, 4] + your_mesh.points[:, 7]) / 3
+    # centerofmeshtriangle_z = (your_mesh.points[:, 2] + your_mesh.points[:, 5] + your_mesh.points[:, 8]) / 3
+    # print(centerofmeshtriangle_x.shape)
+
+    x_range = np.concatenate([your_mesh.points[:, 0], your_mesh.points[:, 3], your_mesh.points[:, 6]])
+    y_range = np.concatenate([your_mesh.points[:, 1], your_mesh.points[:, 4], your_mesh.points[:, 7]])
+    z_range = np.concatenate([your_mesh.points[:, 2], your_mesh.points[:, 5], your_mesh.points[:, 8]])
+    return x_range, y_range, z_range
 
 
+# this is process to extract the geometry information from 3mf file
+def read3mfinfo():
+    shutil.copy('beispiellinse.3mf', 'jg.zip')
+    with zipfile.ZipFile("jg.zip", "r") as zip_ref:
+        zip_ref.extractall()
 
-
-#this is process to extract the geometry information from 3mf file
-shutil.copy('beispiellinse.3mf','jg.zip')
-with zipfile.ZipFile("jg.zip","r") as zip_ref:
-    zip_ref.extractall()
-# archive = zipfile.ZipFile('jg.zip', 'r')
-# modelfile = archive.read('3D/3dmodel.model')
-
-tree =et.parse('3D/3dmodel.model')
-root=tree.getroot()
-vertictes = []
-xgather = []
-ygather = []
-zgather = []
-for x in root[0][1][0][0]:
-    vertictes.append(x.attrib)
-    for key, value in x.items():
-        if key == 'x':
-            xgather.append(float(value))
-        if key == 'y':
-            ygather.append(float(value))
-        if key == 'z':
-            zgather.append(float(value))
-
-
-x_range = np.array(xgather)
-y_range = np.array(ygather)
-z_range = np.array(zgather)
-
-
-
-
-
-xmin = np.min(x_range)
-xmax = np.max(x_range)
-
-ymin = np.min(y_range)
-ymax = np.max(y_range)
-
-
-zmin = np.min(z_range)
-zmax = np.max(z_range)
-
-print(xmin, xmax)
-print(ymin, ymax)
-print(zmin, zmax)
-print(type(x_range))
-dx = 5
-dy = 5
-
+    tree = et.parse('3D/3dmodel.model')
+    root = tree.getroot()
+    vertictes = []
+    xgather = []
+    ygather = []
+    zgather = []
+    for x in root[0][1][0][0]:
+        vertictes.append(x.attrib)
+        for key, value in x.items():
+            if key == 'x':
+                xgather.append(float(value))
+            if key == 'y':
+                ygather.append(float(value))
+            if key == 'z':
+                zgather.append(float(value))
+    return np.array(xgather), np.array(ygather), np.array(zgather)
 
 def finddindex(a, b, meshcenter):
     for xid in range(len(meshcenter[0])):
@@ -114,10 +88,30 @@ def finddindex(a, b, meshcenter):
     return
 
 
+x_range = readstlfile()[0]
+y_range = readstlfile()[1]
+z_range = readstlfile()[2]
+
+xmin = np.min(x_range)
+xmax = np.max(x_range)
+
+ymin = np.min(y_range)
+ymax = np.max(y_range)
+
+zmin = np.min(z_range)
+zmax = np.max(z_range)
+
+print(xmin, xmax)
+print(ymin, ymax)
+print(zmin, zmax)
+print(type(x_range))
+
+dx = 5
+dy = 5
+
 xline = np.arange(xmin, xmax, dx)
 yline = np.arange(ymin, ymax, dy)
 
-# meshc = np.stack((centerofmeshtriangle_x,centerofmeshtriangle_y,centerofmeshtriangle_z))
 meshc = np.stack((x_range, y_range, z_range))
 
 Z = np.ones((len(xline), len(yline)))
@@ -135,21 +129,21 @@ ax.scatter3D(xx, yy, Z, c=Z, cmap='Greens')
 plt.show()
 
 ##the belowed code for showing the plot of original stl file
-from stl import mesh
-from mpl_toolkits import mplot3d
-from matplotlib import pyplot
-
-# Create a new plot
-figure = pyplot.figure()
-axes = mplot3d.Axes3D(figure)
-
-# Load the STL files and add the vectors to the plot
-your_mesh = mesh.Mesh.from_file('beispiellinse.stl')
-axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors))
-
-# Auto scale to the mesh size
-scale = your_mesh.points.flatten()
-axes.auto_scale_xyz(scale, scale, scale)
-
-# Show the plot to the screen
-pyplot.show()
+# from stl import mesh
+# from mpl_toolkits import mplot3d
+# from matplotlib import pyplot
+#
+# # Create a new plot
+# figure = pyplot.figure()
+# axes = mplot3d.Axes3D(figure)
+#
+# # Load the STL files and add the vectors to the plot
+# your_mesh = mesh.Mesh.from_file('beispiellinse.stl')
+# axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors))
+#
+# # Auto scale to the mesh size
+# scale = your_mesh.points.flatten()
+# axes.auto_scale_xyz(scale, scale, scale)
+#
+# # Show the plot to the screen
+# pyplot.show()
