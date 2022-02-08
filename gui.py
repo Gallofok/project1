@@ -1,11 +1,12 @@
 from tkinter import *
+import tkinter.filedialog
 
 root = Tk()
 
 beginn = 0
 end = 100
 
-
+#def fine some basic functions
 def clickit(cmd):
     myLabel.config(text=cmd)
 
@@ -31,14 +32,21 @@ def angularvelcontrol(cmd):
 def confirm():
     scale.set(e.get())
 
+def loadsettingfile():
+    tkinter.filedialog.askopenfilename(title="load setting file")
+
+
+#this is message box
 
 myLabel = Label(root, text=' ')
 myLabel.grid(row=6, column=1)
 
+#this input box will be used to control vel
 e = Entry(root, width=50, font=('Helvetica', 24))
 e.grid(row=3, column=1)
 e.insert(0, "65")
 
+#add some buttons
 Buttonx = Button(root, text="X axis", padx=50, command=lambda cmd="x axis selected": clickit(cmd))
 Buttony = Button(root, text="Y axis", padx=50, command=lambda cmd="y axis selected": clickit(cmd))
 Buttonz = Button(root, text="Z axis", padx=50, command=lambda cmd="z axis selected": clickit(cmd))
@@ -57,6 +65,9 @@ Buttonvel = Button(root, text="linear vel", padx=50, command=lambda cmd="vel con
 Buttonangvel = Button(root, text="angular vel", padx=50,
                       command=lambda cmd=" angular control selected ": angularvelcontrol(cmd))
 Buttonconfirm = Button(root, text="enter", padx=50, command=confirm)
+Buttonload = Button(root, text="load setting", padx=50, command=loadsettingfile)
+
+#put the button in the plattform
 Buttonx.grid(row=0, column=0)
 Buttony.grid(row=0, column=1)
 Buttonz.grid(row=0, column=2)
@@ -67,6 +78,7 @@ Buttonclockwiserotation.grid(row=2, column=0)
 Buttonangvel.grid(row=2, column=1)
 Buttonanticlockwiserotation.grid(row=2, column=2)
 Buttonconfirm.grid(row=3, column=2)
+Buttonload.grid(row = 5,column=2)
 
 scale = Scale(root, variable=DoubleVar(), orient=HORIZONTAL, from_=beginn, to=end)
 scale.grid(row=4, column=1)
