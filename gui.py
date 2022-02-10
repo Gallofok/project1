@@ -10,12 +10,13 @@ class tab1:
         self.barend = 100
 
         self.myLabel = Label(self.root, text=' ')
-        self.myLabel.grid(row=6, column=1)
+        
 
         self.e = Entry(width=50, font=('Helvetica', 24))
-        self.e.grid(row=3, column=1)
+        
         self.e.insert(0, "65")
 
+        
         # add some buttons
         self.Buttonx = Button(root, text="X axis", padx=50, command=lambda cmd="x axis selected": self.clickit(cmd))
         self.Buttony = Button(root, text="Y axis", padx=50, command=lambda cmd="y axis selected": self.clickit(cmd))
@@ -50,12 +51,16 @@ class tab1:
         self.Buttonanticlockwiserotation.grid(row=2, column=2)
         self.Buttonconfirm.grid(row=3, column=2)
         self.Buttonload.grid(row=5, column=2)
-
-        self.scale = Scale(root, variable=DoubleVar(), orient=HORIZONTAL, from_=beginn, to=end)
+        self.myLabel.grid(row=6, column=1)
+        self.e.grid(row=3, column=1)
         self.scale.grid(row=4, column=1)
-
-        self.Labelofscale = Label(root, text='this is speed control bar')
         self.Labelofscale.grid(row=5, column=1)
+        
+        self.scale = Scale(self.root, variable=DoubleVar(), orient=HORIZONTAL, from=self.barbeginn, to= self.barend)
+        
+
+        self.Labelofscale = Label(self.root, text='this is speed control bar')
+        
     #def fine some basic functions
     def clickit(self,cmd):
         self.myLabel.config(text=cmd)
@@ -63,22 +68,21 @@ class tab1:
     def linearvelcontrol(self,cmd):
         self.myLabel.config(text=cmd)
 
-        beginn = 60
-        end = 1600
+        self.barbegin = 60
+        self.barend = 1600
 
 
 
     def angularvelcontrol(self,cmd):
         self.myLabel.config(text=cmd)
-        global beginn, end, scale
-        beginn = 0
-        end = 180
-        scale = Scale(self.root, variable=DoubleVar(), orient=HORIZONTAL, from_=self.barbeginn, to=self.barend)
+        self.barbeginn = 0
+        self.barend = 180
+        scale = Scale(self.root, variable=DoubleVar(), orient=HORIZONTAL, from = self.barbeginn, to=self.barend)
         scale.grid(row=4, column=1)
 
 
     def confirm(self):
-        scale.set(self.e.get())
+        self.scale.set(self.e.get())
     def loadsettingfile(self):
         tkinter.filedialog.askopenfilename(title="load setting file")
 
