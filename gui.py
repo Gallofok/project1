@@ -1,89 +1,92 @@
 from tkinter import *
 import tkinter.filedialog
 
-root = Tk()
+class tab1:
 
-beginn = 0
-end = 100
+    def __init__(self,root,frame):
+        self.root = root
+        self.frame = frame
+        self.barbeginn = 0
+        self.barend = 100
 
-#def fine some basic functions
-def clickit(cmd):
-    myLabel.config(text=cmd)
+        self.myLabel = Label(self.root, text=' ')
+        self.myLabel.grid(row=6, column=1)
 
-def linearvelcontrol(cmd):
-    myLabel.config(text=cmd)
-    global beginn, end, scale
-    beginn = 60
-    end = 1600
-    scale = Scale(root, variable=DoubleVar(), orient=HORIZONTAL, from_=beginn, to=end)
-    scale.grid(row=4, column=1)
+        self.e = Entry(width=50, font=('Helvetica', 24))
+        self.e.grid(row=3, column=1)
+        self.e.insert(0, "65")
+
+        # add some buttons
+        self.Buttonx = Button(root, text="X axis", padx=50, command=lambda cmd="x axis selected": self.clickit(cmd))
+        self.Buttony = Button(root, text="Y axis", padx=50, command=lambda cmd="y axis selected": self.clickit(cmd))
+        self.Buttonz = Button(root, text="Z axis", padx=50, command=lambda cmd="z axis selected": self.clickit(cmd))
+        self.Buttonminus = Button(root, text="-", padx=100, command=lambda cmd="movement minus selected": self.clickit(cmd))
+        self.Buttonclockwiserotation = Button(root, text="clockwise rotation", padx=50, command=lambda cmd="clockwise rotation "
+                                                                                                      "selected ": self.clickit(
+            cmd))
+
+        self.Buttonanticlockwiserotation = Button(root, text="anticlockwise rotation", padx=50,
+                                             command=lambda cmd="anticlockwise "
+                                                                "rotation "
+                                                                "selected ":
+                                             self.clickit(cmd))
+
+        self.Buttonvel = Button(root, text="linear vel", padx=50,
+                           command=lambda cmd="vel control selected": self.linearvelcontrol(cmd))
+        self.Buttonangvel = Button(root, text="angular vel", padx=50,
+                              command=lambda cmd=" angular control selected ": self.angularvelcontrol(cmd))
+        self.Buttonconfirm = Button(root, text="enter", padx=50, command=self.confirm)
+        self.Buttonload = Button(root, text="load setting", padx=50, command=self.loadsettingfile)
+
+        # put the button in the plattform
+        self.Buttonx.grid(row=0, column=0)
+        self.Buttony.grid(row=0, column=1)
+        self.Buttonz.grid(row=0, column=2)
+        self.Buttonplus.grid(row=1, column=0)
+        self.Buttonvel.grid(row=1, column=1)
+        self.Buttonminus.grid(row=1, column=2)
+        self.Buttonclockwiserotation.grid(row=2, column=0)
+        self.Buttonangvel.grid(row=2, column=1)
+        self.Buttonanticlockwiserotation.grid(row=2, column=2)
+        self.Buttonconfirm.grid(row=3, column=2)
+        self.Buttonload.grid(row=5, column=2)
+
+        self.scale = Scale(root, variable=DoubleVar(), orient=HORIZONTAL, from_=beginn, to=end)
+        self.scale.grid(row=4, column=1)
+
+        self.Labelofscale = Label(root, text='this is speed control bar')
+        self.Labelofscale.grid(row=5, column=1)
+    #def fine some basic functions
+    def clickit(self,cmd):
+        self.myLabel.config(text=cmd)
+
+    def linearvelcontrol(self,cmd):
+        self.myLabel.config(text=cmd)
+
+        beginn = 60
+        end = 1600
 
 
 
-def angularvelcontrol(cmd):
-    myLabel.config(text=cmd)
-    global beginn, end, scale
-    beginn = 0
-    end = 180
-    scale = Scale(root, variable=DoubleVar(), orient=HORIZONTAL, from_=beginn, to=end)
-    scale.grid(row=4, column=1)
+    def angularvelcontrol(self,cmd):
+        self.myLabel.config(text=cmd)
+        global beginn, end, scale
+        beginn = 0
+        end = 180
+        scale = Scale(self.root, variable=DoubleVar(), orient=HORIZONTAL, from_=self.barbeginn, to=self.barend)
+        scale.grid(row=4, column=1)
 
 
-def confirm():
-    scale.set(e.get())
+    def confirm(self):
+        scale.set(self.e.get())
+    def loadsettingfile(self):
+        tkinter.filedialog.askopenfilename(title="load setting file")
 
-def loadsettingfile():
-    tkinter.filedialog.askopenfilename(title="load setting file")
+
+    #this is message box
 
 
-#this is message box
 
-myLabel = Label(root, text=' ')
-myLabel.grid(row=6, column=1)
+    #this input box will be used to control vel
 
-#this input box will be used to control vel
-e = Entry(root, width=50, font=('Helvetica', 24))
-e.grid(row=3, column=1)
-e.insert(0, "65")
 
-#add some buttons
-Buttonx = Button(root, text="X axis", padx=50, command=lambda cmd="x axis selected": clickit(cmd))
-Buttony = Button(root, text="Y axis", padx=50, command=lambda cmd="y axis selected": clickit(cmd))
-Buttonz = Button(root, text="Z axis", padx=50, command=lambda cmd="z axis selected": clickit(cmd))
-Buttonplus = Button(root, text="+", padx=100, command=lambda cmd="movement plus selected": clickit(cmd))
-Buttonminus = Button(root, text="-", padx=100, command=lambda cmd="movement minus selected": clickit(cmd))
-Buttonclockwiserotation = Button(root, text="clockwise rotation", padx=50, command=lambda cmd="clockwise rotation "
-                                                                                              "selected ": clickit(
-    cmd))
-
-Buttonanticlockwiserotation = Button(root, text="anticlockwise rotation", padx=50, command=lambda cmd="anticlockwise "
-                                                                                                      "rotation "
-                                                                                                      "selected ":
-clickit(cmd))
-
-Buttonvel = Button(root, text="linear vel", padx=50, command=lambda cmd="vel control selected": linearvelcontrol(cmd))
-Buttonangvel = Button(root, text="angular vel", padx=50,
-                      command=lambda cmd=" angular control selected ": angularvelcontrol(cmd))
-Buttonconfirm = Button(root, text="enter", padx=50, command=confirm)
-Buttonload = Button(root, text="load setting", padx=50, command=loadsettingfile)
-
-#put the button in the plattform
-Buttonx.grid(row=0, column=0)
-Buttony.grid(row=0, column=1)
-Buttonz.grid(row=0, column=2)
-Buttonplus.grid(row=1, column=0)
-Buttonvel.grid(row=1, column=1)
-Buttonminus.grid(row=1, column=2)
-Buttonclockwiserotation.grid(row=2, column=0)
-Buttonangvel.grid(row=2, column=1)
-Buttonanticlockwiserotation.grid(row=2, column=2)
-Buttonconfirm.grid(row=3, column=2)
-Buttonload.grid(row = 5,column=2)
-
-scale = Scale(root, variable=DoubleVar(), orient=HORIZONTAL, from_=beginn, to=end)
-scale.grid(row=4, column=1)
-
-Labelofscale = Label(root, text='this is speed control bar')
-Labelofscale.grid(row=5, column=1)
-
-root.mainloop()
