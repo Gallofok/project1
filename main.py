@@ -4,7 +4,7 @@ import sqlite3
 
 from gui_tab1 import *
 from gui_tab2 import *
-
+from gui_tab3 import *
 ############# prepare Database #############
 conn = sqlite3.connect('speck_datenbank.db')
 c_ = conn.cursor()
@@ -67,7 +67,7 @@ class KalibeR:
         self.my_notebook.add(self.my_frame3, text=" Manuelle Steuerung ")
         self.my_notebook.add(self.my_frame4, text=" Einstellungen ")
 
-        self.mytab1 = tab1(self.root, self.my_frame1)
+        self.mytab1 = tab3(self.root, self.my_frame1)
 
 
 
