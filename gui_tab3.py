@@ -1,6 +1,6 @@
 from tkinter import *
 import tkinter.filedialog
-
+import gui_tab2
 
 class tab3:
 
@@ -41,7 +41,7 @@ class tab3:
         self.Buttonconfirm = Button(self.frame, text="enter", padx=50, command=self.confirm)
         self.Buttonload = Button(self.frame, text="load setting", padx=50, command=self.loadsettingfile)
         self.Labelofscale = Label(self.frame, text='this is speed control bar')
-        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn, to=self.barend,command= self.changethroughslide)
+        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn, to=self.barend,command= self.changethroughslide,length=400)
 
         # put the button in the plattform
 
@@ -60,7 +60,7 @@ class tab3:
         self.e.grid(row=3, column=1)
         self.scale.grid(row=4, column=1)
         self.Labelofscale.grid(row=5, column=1)
-
+        gui_tab2.tab2(self.frame,self.frame)
     def changethroughslide(self,value):
         self.e.delete(0,END)
         self.var = value
@@ -74,7 +74,7 @@ class tab3:
 
         self.barbegin = 60
         self.barend = 1600
-        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn, to=self.barend,command=self.changethroughslide)
+        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn, to=self.barend,command=self.changethroughslide,length= 400)
         self.scale.grid(row=4, column=1)
         self.myLabel.config(text=cmd)
 
@@ -83,7 +83,7 @@ class tab3:
         self.myLabel.config(text=cmd)
         self.barbeginn = 0
         self.barend = 180
-        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn, to=self.barend,command = self.changethroughslide)
+        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn, to=self.barend,command = self.changethroughslide,length= 400)
         self.scale.grid(row=4, column=1)
 
     def confirm(self):
