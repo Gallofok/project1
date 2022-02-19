@@ -3,8 +3,10 @@ from tkinter import ttk
 import sqlite3
 
 from gui_tab1 import *
-from gui_tab2 import *
 from gui_tab3 import *
+from gui_tab2 import *
+from gui_tab4 import *
+
 ############# prepare Database #############
 conn = sqlite3.connect('speck_datenbank.db')
 c_ = conn.cursor()
@@ -43,19 +45,20 @@ class KalibeR:
         self.my_frame2 = Frame(self.my_notebook)
         self.my_frame3 = Frame(self.my_notebook)
         self.my_frame4 = Frame(self.my_notebook)
+
         self.basicframe = LabelFrame(self.root, text="Feedbackbox", bg="green",
-                    fg="white", padx=15, pady=15)
+                    fg="white", padx=15, pady=15,)
 
 
 
-        inputb = Entry(self.basicframe, width=50, font=('Helvetica', 24))
-        positionlabel = Label(self.basicframe,text='this is for feedback')
+        self.inputb = Entry(self.basicframe, width=50, font=('Helvetica', 24))
+        self.positionlabel = Label(self.basicframe,text='this is for feedback')
 
 
 
-        inputb.pack()
-        positionlabel.pack()
-        self.basicframe.pack()
+        self.inputb.pack()
+        self.positionlabel.pack()
+        self.basicframe.place(x = 25,y =875)
         self.my_frame1.pack(fill="both", expand=1)
         self.my_frame2.pack(fill="both", expand=1)
         self.my_frame3.pack(fill="both", expand=1)
@@ -67,13 +70,15 @@ class KalibeR:
         self.my_notebook.add(self.my_frame3, text=" Manuelle Steuerung ")
         self.my_notebook.add(self.my_frame4, text=" Einstellungen ")
 
-        self.mytab1 = tab3(self.root, self.my_frame1)
+        self.mytab1 = tab1(self.root, self.my_frame1)
+        self.mytab3 = tab3(self.root, self.my_frame3)
+
 
 
 
 
     def start(self):
-        self.mytab1.query_database()
+        #self.mytab1.query_database()
         self.root.mainloop()
 
 
