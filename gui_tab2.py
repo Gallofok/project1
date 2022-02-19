@@ -14,19 +14,20 @@ class tab2:
 
         self.root = root
         self.frame = frame
-        # self.loadimg = PhotoImage(file="control_xy.png")
-        # self.button_add_cust = Button(self.frame, image=self.loadimg)
-        # self.button_add_cust.pack()
+
         self.canvas = Canvas(self.root, width=400, height=400, borderwidth=0, highlightthickness=0 )
 
 
-        self.centrepos = (100,100)
+        self.centrepos = (150,150)
+        self.tri1,self.tri2,self.tri3,self.tri4 = self.createfourtriangle(centerpos=self.centrepos)
         self.rad  = (50,40,30)
         self.angstart = (45,135,225,315)
         self.angend = (125,215,305,395)
         self.arclise = []
         self.colorlis = ["#2ECC71","#F4D03F","#5DADE2"]
         self.colorlishighlight = ["#28B463","#F1C40F","#3498DB"]
+
+
         for j in range(4):
             for i in range(3):
                 self.arclise.append(self.circle_arcit(self.centrepos[0], self.centrepos[1], self.rad[i], fill=self.colorlis[i],
@@ -41,7 +42,10 @@ class tab2:
                 self.canvas.tag_bind(self.arclise[i], '<Button-1>', self.cli2)
             if a == 2:
                 self.canvas.tag_bind(self.arclise[i], '<Button-1>', self.cli3)
-
+        self.canvas.tag_bind(self.tri1, '<Button-1>', self.cli)
+        self.canvas.tag_bind(self.tri2, '<Button-1>', self.cli2)
+        self.canvas.tag_bind(self.tri3, '<Button-1>', self.cli3)
+        self.canvas.tag_bind(self.tri4, '<Button-1>', self.cli3)
         self.canvas.pack()
     def cli(self, event):
         print("HI1")
@@ -49,6 +53,26 @@ class tab2:
         print("HI2")
     def cli3(self, event):
         print("HI3")
+    def createfourtriangle(self,centerpos,distance = 60):
+
+        tri1pts = [centerpos[0]-distance,centerpos[1]-10,centerpos[0]-distance,centerpos[1]+10,
+                   centerpos[0]-distance-20,centerpos[1]]
+        tri2pts = [centerpos[0] + distance, centerpos[1] - 10, centerpos[0] + distance, centerpos[1] + 10,
+                   centerpos[0] + distance + 20, centerpos[1]]
+        tri3pts = [centerpos[0] , centerpos[1] - 20-distance, centerpos[0] - 10, centerpos[1] - distance,
+                   centerpos[0] +10 , centerpos[1]-distance]
+        tri4pts = [centerpos[0] , centerpos[1] + 20+distance, centerpos[0] - 10, centerpos[1] + distance,
+                   centerpos[0] +10 , centerpos[1]+distance]
+        self.tri1 = self.canvas.create_polygon(tri1pts, fill='#E74C3C',activefill="red")
+        self.tri2 = self.canvas.create_polygon(tri2pts, fill='#E74C3C',activefill="red")
+        self.tri3 = self.canvas.create_polygon(tri3pts, fill='#E74C3C',activefill="red")
+        self.tri4 = self.canvas.create_polygon(tri4pts, fill='#E74C3C',activefill="red")
+        self.canvas.create_text(centerpos[0]-distance-40,centerpos[1],text="-x")
+        self.canvas.create_text(centerpos[0]+ distance + 40, centerpos[1], text="+x")
+        self.canvas.create_text(centerpos[0], centerpos[1]-distance-40, text="-y")
+        self.canvas.create_text(centerpos[0], centerpos[1]+distance+40, text="+y")
+        return self.tri1,self.tri2,self.tri3,self.tri4
+
 
     def circle_arcit(self, x, y, r, **kwargs):
         if "start" in kwargs and "end" in kwargs:
