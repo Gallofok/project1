@@ -1,6 +1,6 @@
 from tkinter import *
 import tkinter.filedialog
-import gui_tab2
+import round_controller
 
 class tab3:
 
@@ -60,7 +60,11 @@ class tab3:
         self.e.grid(row=3, column=1)
         self.scale.grid(row=4, column=1)
         self.Labelofscale.grid(row=5, column=1)
-        gui_tab2.tab2(self.frame,self.frame)
+        self.control = round_controller.round_controller(self.frame,self.frame)
+        self.control.canvas.tag_bind(self.control.tri1,'<Button-1>', self.hel)
+
+    def hel(self,k):
+        print('this func is used to test if the widget between two tag can communcate')
     def changethroughslide(self,value):
         self.e.delete(0,END)
         self.var = value
@@ -74,7 +78,8 @@ class tab3:
 
         self.barbegin = 60
         self.barend = 1600
-        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn, to=self.barend,command=self.changethroughslide,length= 400)
+        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn,
+                           to=self.barend,command=self.changethroughslide,length= 400)
         self.scale.grid(row=4, column=1)
         self.myLabel.config(text=cmd)
 
@@ -83,7 +88,8 @@ class tab3:
         self.myLabel.config(text=cmd)
         self.barbeginn = 0
         self.barend = 180
-        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn, to=self.barend,command = self.changethroughslide,length= 400)
+        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn,
+                           to=self.barend,command = self.changethroughslide,length= 400)
         self.scale.grid(row=4, column=1)
 
     def confirm(self):
