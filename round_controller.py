@@ -1,12 +1,7 @@
 from tkinter import *
-from tkinter import ttk
-from typing import Counter, ValuesView
-import sqlite3
-import matplotlib.pyplot as plt
-from matplotlib.testing.jpl_units import rad
 
 
-class tab2:
+class round_controller:
 
     def __init__(self, root, frame):
 
@@ -39,10 +34,10 @@ class tab2:
                 self.canvas.tag_bind(self.arclise[i], '<Button-1>', self.cli2)
             if a == 2:
                 self.canvas.tag_bind(self.arclise[i], '<Button-1>', self.cli3)
-        self.canvas.tag_bind(self.tri1, '<Button-1>', self.cli)
-        self.canvas.tag_bind(self.tri2, '<Button-1>', self.cli2)
-        self.canvas.tag_bind(self.tri3, '<Button-1>', self.cli3)
-        self.canvas.tag_bind(self.tri4, '<Button-1>', self.cli3)
+        # self.canvas.tag_bind(self.tri1, '<Button-1>', self.cli)
+        # self.canvas.tag_bind(self.tri2, '<Button-1>', self.cli2)
+        # self.canvas.tag_bind(self.tri3, '<Button-1>', self.cli3)
+        # self.canvas.tag_bind(self.tri4, '<Button-1>', self.cli3)
 
         self.canvas.grid()
 
@@ -90,6 +85,6 @@ if __name__ == "__main__":
     root = Tk()
     frame = Frame(root)
 
-    tab2(root, root)
+    round_controller(root, root)
 
     root.mainloop()
