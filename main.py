@@ -4,7 +4,7 @@ import sqlite3
 
 from gui_tab1 import *
 from gui_tab3 import *
-from gui_tab2 import *
+from round_controller import *
 from gui_tab4 import *
 
 ############# prepare Database #############
