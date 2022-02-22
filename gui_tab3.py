@@ -44,7 +44,7 @@ class tab3:
                                    command=lambda cmd=" angular control selected ": self.angularvelcontrol(cmd))
         self.Buttonconfirm = Button(self.frame, text="enter", padx=50, command=self.confirm)
         self.Buttonload = Button(self.frame, text="load setting", padx=50, command=self.loadsettingfile)
-        self.Labelofscale = Label(self.frame, text='this is speed control bar')
+        self.Labelofscale = Label(self.frame, text='speed control bar')
         self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn, to=self.barend,
                            command=self.changethroughslide, length=400)
 
@@ -61,10 +61,10 @@ class tab3:
         self.Buttonanticlockwiserotation.grid(row=2, column=2)
         self.Buttonconfirm.grid(row=3, column=2)
         self.Buttonload.grid(row=5, column=2)
-        self.myLabel.grid(row=6, column=1)
+        self.myLabel.grid(row=6, column=0)
         self.e.grid(row=3, column=1)
         self.scale.grid(row=4, column=1)
-        self.Labelofscale.grid(row=5, column=1)
+        self.Labelofscale.grid(row=5, column=0)
 
         self.jj = LabelFrame(self.frame)
         self.jj.grid(row=6, column=1)
