@@ -83,7 +83,7 @@ def read3mfinfo():
 
 def finddindex(a, b, meshcenter):
     for xid in range(len(meshcenter[0])):
-        if np.abs((meshcenter[0, xid] - a)) <= 0.3 and np.abs((meshcenter[1, xid] - b)) <= 0.3:
+        if np.abs((meshcenter[0, xid] - a)) <= 0.5 and np.abs((meshcenter[1, xid] - b)) <= 0.5:
             return xid
     return
 
@@ -92,19 +92,34 @@ x_range = readstlfile()[0]
 y_range = readstlfile()[1]
 z_range = readstlfile()[2]
 
+f = open("gcode.txt", "w")
+f.write(
+"M109 S205 ; set temperature and wait for it to be reached" +'\n'
+"G21 ; set units to millimeters" +'\n'
+"G90 ; use absolute coordinates" +'\n'
+"M82 ; use absolute distances for extrusion" +'\n'
+"G92 E0" +'\n'
+"G1 Z0.500 F7800.000" +'\n'
+"G1 E-2.00000 F2400.00000" +'\n'
+"G92 E0"+'\n'
+"G1 X79.213 Y79.222 F7800.000" +'\n'
+"G1 E2.00000 F2400.00000" +'\n'
+"G1 F1800"+'\n'
+)
+
 xmin = np.min(x_range)
 xmax = np.max(x_range)
 
 ymin = np.min(y_range)
 ymax = np.max(y_range)
 
-zmin = np.min(z_range)
-zmax = np.max(z_range)
+#zmin = np.min(z_range)
+#zmax = np.max(z_range)
 
-print(xmin, xmax)
-print(ymin, ymax)
-print(zmin, zmax)
-print(type(x_range))
+#print(xmin, xmax)
+#print(ymin, ymax)
+#print(zmin, zmax)
+#print(type(x_range))
 
 dx = 5
 dy = 5
@@ -120,14 +135,28 @@ for xi in range(len(xline)):
     for yi in range(len(yline)):
         if finddindex(xline[xi], yline[yi], meshc) is not None:
             Z[xi, yi] = meshc[2, finddindex(xline[xi], yline[yi], meshc)]
+            f.write("G1"+"X"+str(xline[xi])+"Y"+str(yline[yi])+"Z"+"220"+'\n')
 
+f.write("G92 E0"+'\n'
+"M107"+'\n'
+
+
+"M104 S0" +'\n'
+"G28 X0"  +'\n'
+"M84"    +'\n' 
+
+"M140 S0" +'\n')
+
+
+f.close()
+
+f = open("gcode.txt", "r")
+print(f.read())
 print(Z)
 fig = plt.figure()
 ax = plt.axes(projection='3d')
-
 ax.scatter3D(xx, yy, Z, c=Z, cmap='Greens')
 plt.show()
-
 ##the belowed code for showing the plot of original stl file
 # from stl import mesh
 # from mpl_toolkits import mplot3d
@@ -138,12 +167,12 @@ plt.show()
 # axes = mplot3d.Axes3D(figure)
 #
 # # Load the STL files and add the vectors to the plot
-# your_mesh = mesh.Mesh.from_file('beispiellinse.stl')
-# axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors))
+# your_mesh = mesh.mesh.from_file('beispiellinse.stl')
+# axes.add_collection3d(mplot3d.art3d.poly3dcollection(your_mesh.vectors))
 #
-# # Auto scale to the mesh size
+# # auto scale to the mesh size
 # scale = your_mesh.points.flatten()
 # axes.auto_scale_xyz(scale, scale, scale)
 #
-# # Show the plot to the screen
+# # show the plot to the screen
 # pyplot.show()
