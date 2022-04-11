@@ -99,12 +99,12 @@ f.write(
 "G90 ; use absolute coordinates" +'\n'
 "M82 ; use absolute distances for extrusion" +'\n'
 "G92 E0" +'\n'
-"G1 Z0.500 F7800.000" +'\n'
-"G1 E-2.00000 F2400.00000" +'\n'
-"G92 E0"+'\n'
-"G1 X79.213 Y79.222 F7800.000" +'\n'
-"G1 E2.00000 F2400.00000" +'\n'
-"G1 F1800"+'\n'
+#"G1 Z0.500 F7800.000" +'\n'
+#"G1 E-2.00000 F2400.00000" +'\n'
+#"G92 E0"+'\n'
+#"G1 X79.213 Y79.222 F7800.000" +'\n'
+#"G1 E2.00000 F2400.00000" +'\n'
+#"G1 F1800"+'\n'
 )
 
 xmin = np.min(x_range)
@@ -136,12 +136,12 @@ for xi in range(len(xline)):
     for yi in range(len(yline)):
         if finddindex(xline[xi], yline[yi], meshc) is not None:
             Z[xi, yi] = meshc[2, finddindex(xline[xi], yline[yi], meshc)]
-            f.write("G1"+"X"+str(xline[xi])+"Y"+str(yline[yi])+"Z"+"220"+'\n')
+            f.write("G1"+"X"+str(int(xline[xi])-100)+"Y"+str(int(yline[yi])+50)+"Z"+str(-int(Z[xi, yi])+200)+'\n')
    if xi % 2 != 0:
-    for yi in range(len(yline)-1,0,-1):
+    for yi in range(len(yline)-1,-1,-1):
         if finddindex(xline[xi], yline[yi], meshc) is not None:
             Z[xi, yi] = meshc[2, finddindex(xline[xi], yline[yi], meshc)]
-            f.write("G1"+"X"+str(xline[xi])+"Y"+str(yline[yi])+"Z"+"220"+'\n')
+            f.write("G1"+"X"+str(int(xline[xi])-100)+"Y"+str(int(yline[yi])+50)+"Z"+str(-int(Z[xi, yi])+200)+'\n')
 
 f.write("G92 E0"+'\n'
 "M107"+'\n'
