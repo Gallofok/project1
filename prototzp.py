@@ -92,7 +92,7 @@ x_range = readstlfile()[0]
 y_range = readstlfile()[1]
 z_range = readstlfile()[2]
 
-f = open("gcode.txt", "w")
+f = open("gcode.gcode", "w")
 f.write(
 "M109 S205 ; set temperature and wait for it to be reached" +'\n'
 "G21 ; set units to millimeters" +'\n'
@@ -132,7 +132,13 @@ meshc = np.stack((x_range, y_range, z_range))
 Z = np.ones((len(xline), len(yline)))
 xx, yy = np.meshgrid(xline, yline)
 for xi in range(len(xline)):
+   if xi % 2 == 0:
     for yi in range(len(yline)):
+        if finddindex(xline[xi], yline[yi], meshc) is not None:
+            Z[xi, yi] = meshc[2, finddindex(xline[xi], yline[yi], meshc)]
+            f.write("G1"+"X"+str(xline[xi])+"Y"+str(yline[yi])+"Z"+"220"+'\n')
+   if xi % 2 != 0:
+    for yi in range(len(yline)-1,0,-1):
         if finddindex(xline[xi], yline[yi], meshc) is not None:
             Z[xi, yi] = meshc[2, finddindex(xline[xi], yline[yi], meshc)]
             f.write("G1"+"X"+str(xline[xi])+"Y"+str(yline[yi])+"Z"+"220"+'\n')
@@ -150,13 +156,13 @@ f.write("G92 E0"+'\n'
 
 f.close()
 
-f = open("gcode.txt", "r")
-print(f.read())
-print(Z)
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-ax.scatter3D(xx, yy, Z, c=Z, cmap='Greens')
-plt.show()
+#f = open("gcode.txt", "r")
+#print(f.read())
+#print(Z)
+#fig = plt.figure()
+#ax = plt.axes(projection='3d')
+#ax.scatter3D(xx, yy, Z, c=Z, cmap='Greens')
+#plt.show()
 ##the belowed code for showing the plot of original stl file
 # from stl import mesh
 # from mpl_toolkits import mplot3d
