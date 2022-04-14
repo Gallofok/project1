@@ -12,9 +12,9 @@ class round_controller:
 
         self.centrepos = (200, 200)
         self.tri1, self.tri2, self.tri3, self.tri4 = self.createfourtriangle(centerpos=self.centrepos)
-        self.rad = (50, 40, 30)
-        self.angstart = (45, 135, 225, 315)
-        self.angend = (125, 215, 305, 395)
+        self.rad = (100, 80, 60)
+        self.angstart = (45, 135, 225, -45)
+        self.angend = (135, 225, 315, 45)
         self.arclise = []
         self.colorlis = ["#2ECC71", "#F4D03F", "#5DADE2"]  # green yellow blue
         self.colorlishighlight = ["#28B463", "#F1C40F", "#3498DB"]  # corresponding colors
@@ -26,18 +26,13 @@ class round_controller:
                                       start=self.angstart[j], end=self.angend[j],
                                       activefill=self.colorlishighlight[i]))
 
-        for i in range(len(self.arclise)):
-            a = i % 3
-            if a == 0:
-                self.canvas.tag_bind(self.arclise[i], '<Button-1>', self.cli)
-            if a == 1:
-                self.canvas.tag_bind(self.arclise[i], '<Button-1>', self.cli2)
-            if a == 2:
-                self.canvas.tag_bind(self.arclise[i], '<Button-1>', self.cli3)
-        # self.canvas.tag_bind(self.tri1, '<Button-1>', self.cli)
-        # self.canvas.tag_bind(self.tri2, '<Button-1>', self.cli2)
-        # self.canvas.tag_bind(self.tri3, '<Button-1>', self.cli3)
-        # self.canvas.tag_bind(self.tri4, '<Button-1>', self.cli3)
+
+        self.canvas.tag_bind(self.arclise[0], '<Button-1>', self.cli)
+
+        self.canvas.tag_bind(self.arclise[1], '<Button-1>', self.cli2)
+
+        self.canvas.tag_bind(self.arclise[2], '<Button-1>', self.cli3)
+
 
         self.canvas.grid()
 
@@ -51,7 +46,7 @@ class round_controller:
     def cli3(self, event):
         print("HI3")
 
-    def createfourtriangle(self, centerpos, distance=60):
+    def createfourtriangle(self, centerpos, distance=110):
 
         tri1pts = [centerpos[0] - distance, centerpos[1] - 10, centerpos[0] - distance, centerpos[1] + 10,
                    centerpos[0] - distance - 20, centerpos[1]]
