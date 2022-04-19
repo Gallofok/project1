@@ -110,10 +110,28 @@ class tab3:
 
 
         self.control = round_controller.round_controller(self.jj, self.jj)
-        self.control.canvas.tag_bind(self.control.tri1, '<Button-1>', self.xmovingminus)
-        self.control.canvas.tag_bind(self.control.tri2, '<Button-1>', self.xmovingplus)
-        self.control.canvas.tag_bind(self.control.tri3, '<Button-1>', self.ymovingplus)
-        self.control.canvas.tag_bind(self.control.tri4, '<Button-1>', self.ymovingminus)
+        """
+        round button control binding 
+        
+        """
+
+        self.control.canvas.tag_bind(self.control.arclise[0], '<Button-1>', self.ymovingplus2)
+        self.control.canvas.tag_bind(self.control.arclise[1], '<Button-1>', self.ymovingplus1)
+        self.control.canvas.tag_bind(self.control.arclise[2], '<Button-1>', self.ymovingplus0)
+
+        self.control.canvas.tag_bind(self.control.arclise[3], '<Button-1>', self.xmovingminus2)
+        self.control.canvas.tag_bind(self.control.arclise[4], '<Button-1>', self.xmovingminus1)
+        self.control.canvas.tag_bind(self.control.arclise[5], '<Button-1>', self.xmovingminus0)
+
+        self.control.canvas.tag_bind(self.control.arclise[6], '<Button-1>', self.ymovingminus2)
+        self.control.canvas.tag_bind(self.control.arclise[7], '<Button-1>', self.ymovingminus1)
+        self.control.canvas.tag_bind(self.control.arclise[8], '<Button-1>', self.ymovingminus0)
+
+        self.control.canvas.tag_bind(self.control.arclise[9], '<Button-1>', self.xmovingplus2)
+        self.control.canvas.tag_bind(self.control.arclise[10], '<Button-1>', self.xmovingplus1)
+        self.control.canvas.tag_bind(self.control.arclise[11], '<Button-1>', self.xmovingplus0)
+
+
 
         self.control2 = reccontrol.reccontrol(self.jg,self.jg)
         self.control2.canvas.tag_bind(self.control2.trilist[0], '<Button-1>', self.zmovingminus2)
@@ -165,52 +183,101 @@ class tab3:
         self.ser.write(str.encode("G91\r\n"))
         self.ser.write(str.encode("G01"+direction+scale+"\r\n"))
 
-    def xmovingminus(self,default = 0 ):
+    def xmovingminus0(self,default = 0 ):
         dir = 'X'
-        sc = '-5'
+        sc = '-0.1'
         self.moving(direction=dir,scale=sc)
 
-    def xmovingplus(self,default = 0 ):
+    def xmovingplus0(self,default = 0 ):
         dir = 'X'
-        sc = '5'
+        sc = '0.1'
         self.moving(direction=dir,scale=sc)
 
+    def xmovingminus1(self, default=0):
+        dir = 'X'
+        sc = '-1'
+        self.moving(direction=dir, scale=sc)
 
-    def ymovingminus(self,default = 0 ):
+    def xmovingplus1(self, default=0):
+        dir = 'X'
+        sc = '1'
+        self.moving(direction=dir, scale=sc)
+
+    def xmovingminus2(self, default=0):
+        dir = 'X'
+        sc = '-10'
+        self.moving(direction=dir, scale=sc)
+
+    def xmovingplus2(self, default=0):
+        dir = 'X'
+        sc = '10'
+        self.moving(direction=dir, scale=sc)
+
+
+
+    def ymovingminus0(self,default = 0 ):
         dir = 'Y'
-        sc = '-5'
+        sc = '-0.1'
         self.moving(direction=dir,scale=sc)
 
-    def ymovingplus(self,default = 0 ):
+    def ymovingplus0(self,default = 0 ):
         dir = 'Y'
-        sc = '5'
+        sc = '0.1'
         self.moving(direction=dir,scale=sc)
+
+    def ymovingminus1(self, default=0):
+        dir = 'Y'
+        sc = '-1'
+        self.moving(direction=dir, scale=sc)
+
+    def ymovingplus1(self, default=0):
+        dir = 'Y'
+        sc = '1'
+        self.moving(direction=dir, scale=sc)
+
+    def ymovingminus2(self, default=0):
+        dir = 'y'
+        sc = '-10'
+        self.moving(direction=dir, scale=sc)
+
+    def ymovingplus2(self, default=0):
+        dir = 'Y'
+        sc = '10'
+        self.moving(direction=dir, scale=sc)
+
+
 
     def zmovingminus2(self,default = 0 ):
         dir = 'Z'
-        sc = '-5'
+        sc = '-10'
         self.moving(direction=dir,scale=sc)
     def zmovingminus1(self,default = 0 ):
         dir = 'Z'
-        sc = '-2'
+        sc = '-1'
         self.moving(direction=dir,scale=sc)
     def zmovingminus0(self,default = 0 ):
         dir = 'Z'
-        sc = '-1'
+        sc = '-0.1'
         self.moving(direction=dir,scale=sc)
 
     def zmovingplus2(self,default = 0 ):
         dir = 'Z'
-        sc = '5'
+        sc = '10'
         self.moving(direction=dir,scale=sc)
     def zmovingplus1(self,default = 0 ):
         dir = 'Z'
-        sc = '2'
+        sc = '1'
         self.moving(direction=dir,scale=sc)
     def zmovingplus0(self,default = 0 ):
         dir = 'Z'
-        sc = '1'
+        sc = '0.1'
         self.moving(direction=dir,scale=sc)
+
+
+
+
+
+
 
 if __name__ == "__main__":
     root = Tk()
