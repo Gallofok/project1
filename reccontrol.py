@@ -22,9 +22,9 @@ class reccontrol():
             if np.abs(i-2.5) > 2:
                  self.trilist.append(self.canvas.create_rectangle(0,i*50,100,50+i*50,fill = self.colorlis[2],activefill = self.colorlishighlight[2]))
 
-        self.canvas.create_text(150,50,text='-z')
-        self.canvas.create_text(150,250,text='+z')
-        print(self.trilist)
+        self.canvas.create_text(125,50,text='-z',font='Helvetica 15 bold')
+        self.canvas.create_text(125,250,text='+z',font='Helvetica 15 bold')
+        self.gg = self.trilist
         self.canvas.pack()
 
 
