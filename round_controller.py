@@ -26,13 +26,11 @@ class round_controller:
                                       start=self.angstart[j], end=self.angend[j],
                                       activefill=self.colorlishighlight[i]))
 
-
         self.canvas.tag_bind(self.arclise[0], '<Button-1>', self.cli)
 
         self.canvas.tag_bind(self.arclise[1], '<Button-1>', self.cli2)
 
         self.canvas.tag_bind(self.arclise[2], '<Button-1>', self.cli3)
-
 
         self.canvas.grid()
 
