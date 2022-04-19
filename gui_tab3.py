@@ -1,7 +1,12 @@
 from tkinter import *
 import tkinter.filedialog
-import round_controller
 
+from matplotlib.pyplot import connect
+from sklearn.preprocessing import scale
+import round_controller
+import reccontrol
+import serial
+import time
 
 class tab3:
 
@@ -9,91 +14,124 @@ class tab3:
         self.root = root
         self.frame = frame
         self.var = DoubleVar()
-
         self.barbeginn = 0
         self.barend = 500
+        self.buttonframe = LabelFrame(self.frame)
+        self.portframe = LabelFrame(self.frame)
 
         self.myLabel = Label(self.frame, text=' ')
-        self.e = Entry(self.frame, width=20, font=('Helvetica', 25))
+        self.e = Entry(self.buttonframe, width=20, font=('Helvetica', 25))
+
+
+
+        self.scrollbar = Scrollbar(self.portframe)
+        self.scrollbar.pack( side = RIGHT, fill = Y )
+
+        self.mylist = Listbox(self.portframe, yscrollcommand = self.scrollbar.set )
+        for line in range(6):
+            self.mylist.insert(END, "COM " + str(line))
+
+        self.mylist.pack()
+        self.scrollbar.config( command = self.mylist.yview )
+
+        self.portchoice = Button(self.portframe, text="connect", padx=50,command=self.connect3d)
+        self.portchoice.pack()
+        self.home = Button(self.portframe, text="home", padx=50,command=self.Homexyz)
+        self.home.pack()
+        self.disconnecrt = Button(self.portframe, text="disconnnect", padx=50,command=self.disconnect3d)
+        self.disconnecrt.pack()
+        self.portframe.grid(row=3,column=0)
 
         # add some buttons
-        self.Buttonx = Button(self.frame, text="A axis", padx=50,
+        self.Buttonx = Button(self.buttonframe, text="A axis", padx=50,
                               command=lambda cmd="A axis selected": self.clickit(cmd))
-        self.Buttony = Button(self.frame, text="B axis", padx=50,
+        self.Buttony = Button(self.buttonframe, text="B axis", padx=50,
                               command=lambda cmd="B axis selected": self.clickit(cmd))
-        self.Buttonz = Button(self.frame, text="C axis", padx=50,
+        self.Buttonz = Button(self.buttonframe, text="C axis", padx=50,
                               command=lambda cmd="C axis selected": self.clickit(cmd))
-        self.Buttonminus = Button(self.frame, text="-", padx=50,
+        self.Buttonminus = Button(self.buttonframe, text="-", padx=50,
                                   command=lambda cmd="movement minus selected": self.clickit(cmd))
-        self.Buttonplus = Button(self.frame, text="+", padx=50,
+        self.Buttonplus = Button(self.buttonframe, text="+", padx=50,
                                  command=lambda cmd="movement plus selected": self.clickit(cmd))
-        self.Buttonclockwiserotation = Button(self.frame, text="clockwise", padx=50,
-                                              command=lambda cmd="clockwise rotation "
-                                                                 "selected ": self.clickit(
-                                                  cmd))
+        #self.Buttonconnectto3d = Button(self.portframe, text="port", padx=50)
 
-        self.Buttonanticlockwiserotation = Button(self.frame, text="anticlockwise", padx=50,
-                                                  command=lambda cmd="anticlockwise "
-                                                                     "rotation "
-                                                                     "selected ":
-                                                  self.clickit(cmd))
 
-        self.Buttonvel = Button(self.frame, text="linear vel", padx=50,
+        # self.Buttonclockwiserotation = Button(self.frame, text="clockwise", padx=50,
+        #                                       command=lambda cmd="clockwise rotation "
+        #                                                          "selected ": self.clickit(
+        #                                           cmd))
+
+        # self.Buttonanticlockwiserotation = Button(self.frame, text="anticlockwise", padx=50,
+        #                                           command=lambda cmd="anticlockwise "
+        #                                                              "rotation "
+        #                                                              "selected ":
+        #                                           self.clickit(cmd))
+
+        self.Buttonvel = Button(self.buttonframe, text="linear vel", padx=50,
                                 command=lambda cmd="vel control selected": self.linearvelcontrol(cmd))
-        self.Buttonangvel = Button(self.frame, text="angular vel", padx=50,
-                                   command=lambda cmd=" angular control selected ": self.angularvelcontrol(cmd))
-        self.Buttonconfirm = Button(self.frame, text="enter", padx=50, command=self.confirm)
-        self.Buttonload = Button(self.frame, text="load setting", padx=50, command=self.loadsettingfile)
-        self.Labelofscale = Label(self.frame, text='speed control bar')
-        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn, to=self.barend,
-                           command=self.changethroughslide, length=400)
+        # self.Buttonangvel = Button(self.frame, text="angular vel", padx=50,
+        #                            command=lambda cmd=" angular control selected ": self.angularvelcontrol(cmd))
+        self.Buttonconfirm = Button(self.buttonframe, text="enter", padx=50, command=self.confirm)
+        # self.Buttonload = Button(self.frame, text="load setting", padx=50, command=self.loadsettingfile)
+        self.Labelofscale = Label(self.buttonframe, text='speed control bar')
+
+
+
 
         # put the button in the plattform
 
+        self.buttonframe.grid(row=0,column=0)
         self.Buttonx.grid(row=0, column=0)
         self.Buttony.grid(row=0, column=1)
         self.Buttonz.grid(row=0, column=2)
         self.Buttonplus.grid(row=1, column=0)
         self.Buttonvel.grid(row=1, column=1)
         self.Buttonminus.grid(row=1, column=2)
-        self.Buttonclockwiserotation.grid(row=2, column=0)
-        self.Buttonangvel.grid(row=2, column=1)
-        self.Buttonanticlockwiserotation.grid(row=2, column=2)
+        # self.Buttonclockwiserotation.grid(row=2, column=0)
+        # self.Buttonangvel.grid(row=2, column=1)
+        # self.Buttonanticlockwiserotation.grid(row=2, column=2)
         self.Buttonconfirm.grid(row=3, column=2)
-        self.Buttonload.grid(row=5, column=2)
+        #self.Buttonload.grid(row=5, column=2)
         self.myLabel.grid(row=6, column=0)
         self.e.grid(row=3, column=1)
-        self.scale.grid(row=4, column=1)
+
         self.Labelofscale.grid(row=5, column=0)
+        """
+        moving control
+        1.connect to port
+        """
+        self.ser = None
+
 
         self.jj = LabelFrame(self.frame)
-        self.jj.grid(row=6, column=1)
+        self.jj.grid(row=1, column=0)
         self.jg = LabelFrame(self.frame)
-        self.jg.grid(row=6, column=2)
-        self.zbar = Scale(self.jg, length=200, background='red')
-        self.lab = Label(self.jg, text='+z')
-        self.lab.grid(row=0, column=0)
-        self.lab2 = Label(self.jg, text='-z')
-        self.lab2.grid(row=2, column=0)
-        self.zbar.grid(row=1, column=0)
+        self.jg.grid(row=1, column=1)
+
+
         self.control = round_controller.round_controller(self.jj, self.jj)
-        self.control.canvas.tag_bind(self.control.tri1, '<Button-1>', self.hel)
+        self.control.canvas.tag_bind(self.control.tri1, '<Button-1>', self.xmovingminus)
+        self.control.canvas.tag_bind(self.control.tri2, '<Button-1>', self.xmovingplus)
+        self.control.canvas.tag_bind(self.control.tri3, '<Button-1>', self.ymovingplus)
+        self.control.canvas.tag_bind(self.control.tri4, '<Button-1>', self.ymovingminus)
+
+        self.control2 = reccontrol.reccontrol(self.jg,self.jg)
+        self.control2.canvas.tag_bind(self.control2.trilist[0], '<Button-1>', self.zmovingminus2)
+        self.control2.canvas.tag_bind(self.control2.trilist[1], '<Button-1>', self.zmovingminus1)
+        self.control2.canvas.tag_bind(self.control2.trilist[2], '<Button-1>', self.zmovingminus0)
+        self.control2.canvas.tag_bind(self.control2.trilist[3], '<Button-1>', self.zmovingplus0)
+        self.control2.canvas.tag_bind(self.control2.trilist[4], '<Button-1>', self.zmovingplus1)
+        self.control2.canvas.tag_bind(self.control2.trilist[5], '<Button-1>', self.zmovingplus2)
+
 
     def hel(self, k):
         print('this func is used to test if the widget between two tag can communcate')
-
-    def changethroughslide(self, value):
-        self.e.delete(0, END)
-        self.var = value
-        self.e.insert(0, str(self.var))
-
     def clickit(self, cmd):
-        self.myLabel.config(text=cmd)
 
-    def linearvelcontrol(self, cmd):
+     def linearvelcontrol(self, cmd):
         self.barbegin = 60
-        self.barend = 1600
-        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn,
+        self.barend = 500
+        self.scale = Scale(self.buttonframe, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn,
                            to=self.barend, command=self.changethroughslide, length=400)
         self.scale.grid(row=4, column=1)
         self.myLabel.config(text=cmd)
@@ -102,16 +140,77 @@ class tab3:
         self.myLabel.config(text=cmd)
         self.barbeginn = 0
         self.barend = 180
-        self.scale = Scale(self.frame, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn,
+        self.scale = Scale(self.buttonframe, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn,
                            to=self.barend, command=self.changethroughslide, length=400)
         self.scale.grid(row=4, column=1)
 
     def confirm(self):
         self.scale.set(self.e.get())
 
-    def loadsettingfile(self):
-        tkinter.filedialog.askopenfilename(title="load setting file")
+    def connect3d(self):
+        self.ser = serial.Serial('COM5', 115200)
+        print("connected")
 
+    def Homexyz(self):
+        self.ser.write(str.encode("G28\r\n"))
+
+    def disconnect3d(self):
+        print("disconnect")
+        self.ser.close()
+        self.ser = None
+
+
+    def moving(self,direction,scale):
+        print(str(direction)+''+str(scale))
+        self.ser.write(str.encode("G91\r\n"))
+        self.ser.write(str.encode("G01"+direction+scale+"\r\n"))
+
+    def xmovingminus(self,default = 0 ):
+        dir = 'X'
+        sc = '-5'
+        self.moving(direction=dir,scale=sc)
+
+    def xmovingplus(self,default = 0 ):
+        dir = 'X'
+        sc = '5'
+        self.moving(direction=dir,scale=sc)
+
+
+    def ymovingminus(self,default = 0 ):
+        dir = 'Y'
+        sc = '-5'
+        self.moving(direction=dir,scale=sc)
+
+    def ymovingplus(self,default = 0 ):
+        dir = 'Y'
+        sc = '5'
+        self.moving(direction=dir,scale=sc)
+
+    def zmovingminus2(self,default = 0 ):
+        dir = 'Z'
+        sc = '-5'
+        self.moving(direction=dir,scale=sc)
+    def zmovingminus1(self,default = 0 ):
+        dir = 'Z'
+        sc = '-2'
+        self.moving(direction=dir,scale=sc)
+    def zmovingminus0(self,default = 0 ):
+        dir = 'Z'
+        sc = '-1'
+        self.moving(direction=dir,scale=sc)
+
+    def zmovingplus2(self,default = 0 ):
+        dir = 'Z'
+        sc = '5'
+        self.moving(direction=dir,scale=sc)
+    def zmovingplus1(self,default = 0 ):
+        dir = 'Z'
+        sc = '2'
+        self.moving(direction=dir,scale=sc)
+    def zmovingplus0(self,default = 0 ):
+        dir = 'Z'
+        sc = '1'
+        self.moving(direction=dir,scale=sc)
 
 if __name__ == "__main__":
     root = Tk()
