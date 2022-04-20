@@ -84,13 +84,13 @@ class tab3:
         #                                                              "selected ":
         #                                           self.clickit(cmd))
 
-        self.Buttonvel = Button(self.buttonframe, text="linear vel", padx=50,
-                                command=lambda cmd="vel control selected": self.linearvelcontrol(cmd))
+        # self.Buttonvel = Button(self.buttonframe, text="linear vel", padx=50,
+        #                         command=lambda cmd="vel control selected": self.linearvelcontrol(cmd))
         # self.Buttonangvel = Button(self.frame, text="angular vel", padx=50,
         #                            command=lambda cmd=" angular control selected ": self.angularvelcontrol(cmd))
-        self.Buttonconfirm = Button(self.buttonframe, text="enter", padx=50, command=self.confirm)
+        # self.Buttonconfirm = Button(self.buttonframe, text="enter", padx=50, command=self.confirm)
         # self.Buttonload = Button(self.frame, text="load setting", padx=50, command=self.loadsettingfile)
-        self.Labelofscale = Label(self.buttonframe, text='speed control bar')
+        # self.Labelofscale = Label(self.buttonframe, text='speed control bar')
 
 
 
@@ -102,17 +102,17 @@ class tab3:
         self.Buttony.grid(row=0, column=1)
         self.Buttonz.grid(row=0, column=2)
         self.Buttonplus.grid(row=1, column=0)
-        self.Buttonvel.grid(row=1, column=1)
+        # self.Buttonvel.grid(row=1, column=1)
         self.Buttonminus.grid(row=1, column=2)
         # self.Buttonclockwiserotation.grid(row=2, column=0)
         # self.Buttonangvel.grid(row=2, column=1)
         # self.Buttonanticlockwiserotation.grid(row=2, column=2)
-        self.Buttonconfirm.grid(row=3, column=2)
+        # self.Buttonconfirm.grid(row=3, column=2)
         #self.Buttonload.grid(row=5, column=2)
         self.myLabel.grid(row=6, column=0)
         self.e.grid(row=3, column=1)
 
-        self.Labelofscale.grid(row=5, column=0)
+        # self.Labelofscale.grid(row=5, column=0)
         """
         moving control
         1.connect to port
@@ -158,11 +158,14 @@ class tab3:
         self.control2.canvas.tag_bind(self.control2.trilist[4], '<Button-1>', self.zmovingplus1)
         self.control2.canvas.tag_bind(self.control2.trilist[5], '<Button-1>', self.zmovingplus2)
     def measureprocess(self,cmd):
-        self.ser.write(str.encode("G90\r\n"))
-        self.ser.write(str.encode("G01"+'X'+self.xcor.get()+'Y'+self.ycor.get()))
-        self.ser.write(str.encode("G91\r\n"))
-        for i in range(10):
-            self.ser.write(str.encode("G01"+'X'+'1'))
+        try:
+            self.ser.write(str.encode("G90\r\n"))
+            self.ser.write(str.encode("G01"+'X'+self.xcor.get()+'Y'+self.ycor.get()))
+            self.ser.write(str.encode("G91\r\n"))
+            for i in range(10):
+                self.ser.write(str.encode("G01"+'X'+'1'))
+        except AttributeError:
+            print('no machine connected')
 
     def hel(self, k):
         print('this func is used to test if the widget between two tag can communcate')
@@ -188,22 +191,34 @@ class tab3:
         self.scale.set(self.e.get())
 
     def connect3d(self):
-        self.ser = serial.Serial(self.mylist.selection_get(), 115200)
-        print(self.mylist.selection_get()+' '+"connected")
+        try:
+            self.ser = serial.Serial(self.mylist.selection_get(), 115200)
+            print(self.mylist.selection_get()+' '+"connected")
+        except serial.serialutil.SerialException:
+            print('port'+ ' '+ self.mylist.selection_get() +' '+'can not connect' )
+
 
     def Homexyz(self):
-        self.ser.write(str.encode("G28\r\n"))
-
+        try:
+            self.ser.write(str.encode("G28\r\n"))
+        except AttributeError:
+            print('no machine connected')
     def disconnect3d(self):
-        print("disconnect")
-        self.ser.close()
-        self.ser = None
-
+        try:
+            print("disconnect")
+            self.ser.close()
+            self.ser = None
+        except AttributeError:
+            print('no machine connected')
 
     def moving(self,direction,scale):
         print(str(direction)+''+str(scale))
-        self.ser.write(str.encode("G91\r\n"))
-        self.ser.write(str.encode("G01"+direction+scale+"\r\n"))
+        try:
+            self.ser.write(str.encode("G91\r\n"))
+            self.ser.write(str.encode("G01"+direction+scale+"\r\n"))
+        except AttributeError:
+            print("moving machine not conneted yet")
+
 
     def xmovingminus0(self,default = 0 ):
         dir = 'X'
