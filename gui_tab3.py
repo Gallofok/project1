@@ -18,7 +18,7 @@ class tab3:
         self.barend = 500
         self.buttonframe = LabelFrame(self.frame)
         self.portframe = LabelFrame(self.frame)
-
+        self.measureframe = LabelFrame(self.frame)
         self.myLabel = Label(self.frame, text=' ')
         self.e = Entry(self.buttonframe, width=20, font=('Helvetica', 25))
 
@@ -29,10 +29,11 @@ class tab3:
 
         self.mylist = Listbox(self.portframe, yscrollcommand = self.scrollbar.set )
         for line in range(6):
-            self.mylist.insert(END, "COM " + str(line))
-
+            self.mylist.insert(END, "COM" + str(line))
         self.mylist.pack()
         self.scrollbar.config( command = self.mylist.yview )
+
+
 
         self.portchoice = Button(self.portframe, text="connect", padx=50,command=self.connect3d)
         self.portchoice.pack()
@@ -41,6 +42,21 @@ class tab3:
         self.disconnecrt = Button(self.portframe, text="disconnnect", padx=50,command=self.disconnect3d)
         self.disconnecrt.pack()
         self.portframe.grid(row=3,column=0)
+
+        #measurepart
+        self.xcor = Entry(self.measureframe)
+        self.xcor.grid(row = 0,column=1)
+        self.L1 = Label(self.measureframe, text="x")
+        self.L1.grid(row = 0,column=0)
+        self.ycor = Entry(self.measureframe)
+        self.ycor.grid(row = 1,column=1)
+        self.L2 = Label(self.measureframe, text="y")
+        self.L2.grid(row = 1,column=0)
+        self.measure = Button(self.measureframe,text='measurebeginn')
+        self.measure.grid(row = 2,column=1)
+        self.measure.bind('<Button-1>',self.measureprocess)
+        self.measureframe.grid(row = 3,column=3)
+
 
         # add some buttons
         self.Buttonx = Button(self.buttonframe, text="A axis", padx=50,
@@ -53,6 +69,7 @@ class tab3:
                                   command=lambda cmd="movement minus selected": self.clickit(cmd))
         self.Buttonplus = Button(self.buttonframe, text="+", padx=50,
                                  command=lambda cmd="movement plus selected": self.clickit(cmd))
+
         #self.Buttonconnectto3d = Button(self.portframe, text="port", padx=50)
 
 
@@ -140,7 +157,12 @@ class tab3:
         self.control2.canvas.tag_bind(self.control2.trilist[3], '<Button-1>', self.zmovingplus0)
         self.control2.canvas.tag_bind(self.control2.trilist[4], '<Button-1>', self.zmovingplus1)
         self.control2.canvas.tag_bind(self.control2.trilist[5], '<Button-1>', self.zmovingplus2)
-
+    def measureprocess(self,cmd):
+        self.ser.write(str.encode("G90\r\n"))
+        self.ser.write(str.encode("G01"+'X'+self.xcor.get()+'Y'+self.ycor.get()))
+        self.ser.write(str.encode("G91\r\n"))
+        for i in range(10):
+            self.ser.write(str.encode("G01"+'X'+'1'))
 
     def hel(self, k):
         print('this func is used to test if the widget between two tag can communcate')
@@ -166,8 +188,8 @@ class tab3:
         self.scale.set(self.e.get())
 
     def connect3d(self):
-        self.ser = serial.Serial('COM5', 115200)
-        print("connected")
+        self.ser = serial.Serial(self.mylist.selection_get(), 115200)
+        print(self.mylist.selection_get()+' '+"connected")
 
     def Homexyz(self):
         self.ser.write(str.encode("G28\r\n"))
