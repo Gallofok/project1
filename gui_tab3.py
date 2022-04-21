@@ -169,9 +169,9 @@ class tab3:
 
     def hel(self, k):
         print('this func is used to test if the widget between two tag can communcate')
-    def clickit(self, cmd):
 
-     def linearvelcontrol(self, cmd):
+
+    def linearvelcontrol(self, cmd):
         self.barbegin = 60
         self.barend = 500
         self.scale = Scale(self.buttonframe, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn,
