@@ -1,8 +1,10 @@
 from calendar import c
+from ctypes import WinDLL
 import threading
 from tkinter import *
 import tkinter.filedialog
 import sys
+from turtle import begin_fill
 from matplotlib.pyplot import connect
 from sklearn.preprocessing import scale
 import round_controller
@@ -30,22 +32,23 @@ class tab3:
 
 
 
-        self.scrollbar = Scrollbar(self.portframe)
-        self.scrollbar.pack( side = RIGHT, fill = Y )
 
-        self.mylist = Listbox(self.portframe, yscrollcommand = self.scrollbar.set,width=67)
+        self.mylist = Listbox(self.portframe,width=67)
         for line in range(6):
-            self.mylist.insert(END, "COM" + str(line))
+            str1 = "COM" + str(line)
+            theleng = len(str1)+60
+            modify = str1.rjust(theleng)
+            self.mylist.insert(END,modify)
         self.mylist.pack(fill=X)
-        self.scrollbar.config( command = self.mylist.yview )
+        
 
 
 
-        self.portchoice = Button(self.portframe, text="connect", padx=50,command=self.connect3d)
+        self.portchoice = Button(self.portframe, text="connect", width=50,command=self.connect3d)
         self.portchoice.pack()
-        self.home = Button(self.portframe, text="home", padx=50,command=self.Homexyz)
+        self.home = Button(self.portframe, text="home", width=50,command=self.Homexyz)
         self.home.pack()
-        self.disconnecrt = Button(self.portframe, text="disconnnect", padx=50,command=self.disconnect3d)
+        self.disconnecrt = Button(self.portframe, text="disconnnect", width=50,command=self.disconnect3d)
         self.disconnecrt.pack()
         self.portframe.grid(row=3,column=0)
 
@@ -58,8 +61,8 @@ class tab3:
         self.ycor.grid(row = 1,column=1)
         self.L2 = Label(self.measureframe, text="y")
         self.L2.grid(row = 1,column=0)
-        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess).start())
-        self.emstop = Button(self.measureframe,text='pause',command = self.stoppro,width=26)
+        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess).start(),width = 25)
+        self.emstop = Button(self.measureframe,text='pause',command = self.stoppro,width=25)
 
         self.measure.grid(row = 2,column=1)
         self.emstop.grid(row = 3,column=1)
@@ -173,22 +176,25 @@ class tab3:
         self.n_sample = 100
 
         """
-        Label
+        infor tabel
         """
-        self.labe = LabelFrame(self.frame)
-        self.display_text = StringVar()
-        self.display = Label(self.labe, textvariable=self.display_text,width=60, height=10)
-        self.display.grid(row=0, columnspan=3)
+        self.labe = Frame(self.frame)
+        self.scrollbar = Scrollbar(self.labe)
+        self.scrollbar.pack( side = RIGHT, fill = Y )
+
+        self.mylist = Text(self.labe, yscrollcommand = self.scrollbar.set,width = 60,height=10)
+
+
+        self.mylist.pack( side = LEFT, fill = BOTH )
+        self.scrollbar.config( command = self.mylist.yview )
+
         self.labe.grid(row=4,column=0)
 
-        
+
     def add_txt(self,cmd):
-        s = self.display_text.get()
-        fid = [go.start() for go in re.finditer('\n',s)]
-        if(len(fid)==5):
-            s = ' '
-        s += cmd+'\n'
-        self.display_text.set(s)
+        self.mylist.insert(END,cmd+'\n')
+        self.mylist.yview(END)
+
 
 
     def gettheintensiti(self):
@@ -225,34 +231,31 @@ class tab3:
                 print('moving to the position')
                 self.ser.write(str.encode("G01"+'X'+'1'+'\r\n'))
                 cod = 0
-                while (cod<25000) :
+                while (cod<25000 or cod == np.NaN) :
                     #self.ser.write(str.encode("G01"+'Z'+'-0.1''\r\n'))
                     self.ser.write(str.encode("M0 P1000\r\n"))
                     cod = self.gettheintensiti()
                     #print('dis now is ' + str(cod) + ' um')
-                    print(cod)
+                    self.add_txt(cod)
                     time.sleep(0.1)
-                
-                print('distance is'+ ' : '+ str(self.getthedistance())+ ' ' + 'um')
+                self.add_txt('distance is'+ ' : '+ str(self.getthedistance())+ ' ' + 'um')
                 #self.ser.write(str.encode("G01"+'Z'+'5'+'\r\n'))
                 time.sleep(3.5)
 
         except serial.serialutil.PortNotOpenError:
-            print('port closed')            
             self.add_txt('port closed')   
         except AttributeError:
-            print('no machine connected')
             self.add_txt('no machine connected')
     
 
     def stoppro(self):
         if(self.ser != None):
-            print("disconnect")
+
             self.add_txt('disconnect')
             self.ser.close()
             self.ser = None
         else:
-            print('no port connected now')
+
             self.add_txt('no port connected now')
     
     def linearvelcontrol(self, cmd):
@@ -277,13 +280,13 @@ class tab3:
     def connect3d(self):
         try:
             self.ser = serial.Serial(self.mylist.selection_get(), 115200)
-            print(self.mylist.selection_get()+' '+"connected")
+
             self.add_txt(self.mylist.selection_get()+' '+"connected")
         except serial.serialutil.SerialException:
-            print('port'+ ' '+ self.mylist.selection_get() +' '+'can not connect' )
-            self.add_txt('port'+ ' '+ self.mylist.selection_get() +' '+'can not connect' )
+
+            self.add_txt('port'+ ' '+ self.mylist.selection_get().strip() +' '+'can not connect' )
         except tkinter.TclError:
-            print('one port muss be selected first')
+
             self.add_txt('one port muss be selected first')
 
 
@@ -291,7 +294,6 @@ class tab3:
         try:
             self.ser.write(str.encode("G28\r\n"))
         except AttributeError:
-            print('no machine connected')
             self.add_txt('no machine connected')
     def disconnect3d(self):
         
@@ -302,23 +304,19 @@ class tab3:
                 self.ser.close()
                 self.ser = None
             else:
-                print('no port connected now')
+
                 self.add_txt('no port connected now')
         except AttributeError:
-            print('no machine connected')
             self.add_txt('no machine connected')   
     def moving(self,direction,scale):
         
         try:
-            print(str(direction)+''+str(scale))
             self.ser.write(str.encode("G91\r\n"))
             self.ser.write(str.encode("G01"+direction+scale+"\r\n"))
             self.add_txt(str(direction)+''+str(scale))
         except AttributeError:
-            print("moving machine not conneted yet")
             self.add_txt("moving machine not conneted yet")
         except serial.serialutil.SerialException:
-            print("no connection")
             self.add_txt("no connection")
 
     def xmovingminus0(self,default = 0 ):
