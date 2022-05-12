@@ -1,19 +1,14 @@
 from calendar import c
-from ctypes import WinDLL
 import threading
 from tkinter import *
 import tkinter.filedialog
-import sys
-from turtle import begin_fill
-from matplotlib.pyplot import connect
-from sklearn.preprocessing import scale
 import round_controller
 import reccontrol
 import serial
 import time
 import numpy as np
 import chr_dll2_connection as chr_connection
-import re
+
 
 
 class tab3:
@@ -29,10 +24,6 @@ class tab3:
         self.measureframe = LabelFrame(self.frame,width=400,height=200)
         self.myLabel = Label(self.frame, text=' ')
         self.e = Entry(self.buttonframe, width=20, font=('Helvetica', 25))
-
-
-
-
         self.mylist = Listbox(self.portframe,width=67)
         for line in range(6):
             str1 = "COM" + str(line)
@@ -53,20 +44,46 @@ class tab3:
         self.portframe.grid(row=3,column=0)
 
         #measurepart
-        self.xcor = Entry(self.measureframe)
-        self.xcor.grid(row = 0,column=1)
-        self.L1 = Label(self.measureframe, text="x")
+        self.xbegn = Entry(self.measureframe)
+        self.xbegn.grid(row = 0,column=1)
+        self.L1 = Label(self.measureframe, text="xbeginn")
         self.L1.grid(row = 0,column=0)
-        self.ycor = Entry(self.measureframe)
-        self.ycor.grid(row = 1,column=1)
-        self.L2 = Label(self.measureframe, text="y")
+        self.ybegn = Entry(self.measureframe)
+        self.ybegn.grid(row = 1,column=1)
+        self.L2 = Label(self.measureframe, text="ybeginn")
         self.L2.grid(row = 1,column=0)
         self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause',command = self.stoppro,width=25)
 
-        self.measure.grid(row = 2,column=1)
-        self.emstop.grid(row = 3,column=1)
+
+
+        self.measure.grid(row = 6,column=1)
+        self.emstop.grid(row = 7,column=1)
         self.measureframe.grid(row = 3,column=1)
+
+
+
+        self.xlen = Entry(self.measureframe)
+        self.ylen = Entry(self.measureframe)
+        self.xlen.grid(row = 2,column=1)
+        self.ylen.grid(row = 3,column=1)
+        self.L3 = Label(self.measureframe, text="xlen")
+        self.L3.grid(row = 2,column=0)
+        self.L4 = Label(self.measureframe, text="ylen")
+        self.L4.grid(row = 3,column=0)
+
+        self.L5 = Label(self.measureframe, text="xsamplepkt")
+        self.L5.grid(row = 4,column=0)
+        self.L6 = Label(self.measureframe, text="ysamplepkt")
+        self.L6.grid(row = 5,column=0)
+
+        self.xsample = Entry(self.measureframe)
+        self.ysample = Entry(self.measureframe)
+        self.xsample.grid(row = 4,column=1)
+        self.ysample.grid(row = 5,column=1)
+
+
+
 
 
         # add some buttons
@@ -81,53 +98,23 @@ class tab3:
         self.Buttonplus = Button(self.buttonframe, text="+", padx=50,
                                  command=lambda cmd="movement plus selected": self.clickit(cmd))
 
-        #self.Buttonconnectto3d = Button(self.portframe, text="port", padx=50)
-
-
-        # self.Buttonclockwiserotation = Button(self.frame, text="clockwise", padx=50,
-        #                                       command=lambda cmd="clockwise rotation "
-        #                                                          "selected ": self.clickit(
-        #                                           cmd))
-
-        # self.Buttonanticlockwiserotation = Button(self.frame, text="anticlockwise", padx=50,
-        #                                           command=lambda cmd="anticlockwise "
-        #                                                              "rotation "
-        #                                                              "selected ":
-        #                                           self.clickit(cmd))
-
-        # self.Buttonvel = Button(self.buttonframe, text="linear vel", padx=50,
-        #                         command=lambda cmd="vel control selected": self.linearvelcontrol(cmd))
-        # self.Buttonangvel = Button(self.frame, text="angular vel", padx=50,
-        #                            command=lambda cmd=" angular control selected ": self.angularvelcontrol(cmd))
-        # self.Buttonconfirm = Button(self.buttonframe, text="enter", padx=50, command=self.confirm)
-        # self.Buttonload = Button(self.frame, text="load setting", padx=50, command=self.loadsettingfile)
-        # self.Labelofscale = Label(self.buttonframe, text='speed control bar')
 
 
 
 
         # put the button in the plattform
 
-        #self.buttonframe.grid(row=0,column=0)
+
         self.Buttonx.grid(row=0, column=0)
         self.Buttony.grid(row=0, column=1)
         self.Buttonz.grid(row=0, column=2)
         self.Buttonplus.grid(row=1, column=0)
-        # self.Buttonvel.grid(row=1, column=1)
+
         self.Buttonminus.grid(row=1, column=2)
-        # self.Buttonclockwiserotation.grid(row=2, column=0)
-        # self.Buttonangvel.grid(row=2, column=1)
-        # self.Buttonanticlockwiserotation.grid(row=2, column=2)
-        # self.Buttonconfirm.grid(row=3, column=2)
-        #self.Buttonload.grid(row=5, column=2)
+
         self.myLabel.grid(row=6, column=0)
         self.e.grid(row=3, column=1)
 
-        # self.Labelofscale.grid(row=5, column=0)
-        """
-        moving control
-        1.connect to port
-        """
         self.ser = None
 
 
@@ -173,7 +160,7 @@ class tab3:
         #this code is for the detector
         self.chr = chr_connection.CHR_connection('IP: 169.254.2.217',1)
         self.res = self.chr.send_command('$MMD 0')
-        self.n_sample = 100
+        self.n_sample = 200
 
         """
         infor tabel
@@ -182,19 +169,42 @@ class tab3:
         self.scrollbar = Scrollbar(self.labe)
         self.scrollbar.pack( side = RIGHT, fill = Y )
 
-        self.mylist = Text(self.labe, yscrollcommand = self.scrollbar.set,width = 60,height=10)
+        self.mytext = Text(self.labe, yscrollcommand = self.scrollbar.set,width = 45,height=5)
+        self.clss = Button(self.labe,command=self.cls,text='clear')
+        self.clss.pack(side = LEFT)
 
+        self.reader = Button(self.labe,command=self.readcmd,text='sent')
+        self.reader.pack(side = BOTTOM)
 
-        self.mylist.pack( side = LEFT, fill = BOTH )
-        self.scrollbar.config( command = self.mylist.yview )
+        self.mytext.pack( side = TOP, fill = BOTH )
+        self.scrollbar.config( command = self.mytext.yview )
 
         self.labe.grid(row=4,column=0)
 
 
-    def add_txt(self,cmd):
-        self.mylist.insert(END,cmd+'\n')
-        self.mylist.yview(END)
+    def cls(self):
+        self.mytext.delete("1.0","end")
+    def readcmd(self):
+        #this code read the last line of feedback
+        try:
+            a = self.mytext.get("1.0", "end")
+            idx = len(a.split('\n'))
+            want = a.split('\n')[idx-3]
+            self.ser.write(str.encode(want+"\r\n"))
+            print(want)
+        except AttributeError:
+            self.add_txt('noting connected yet')
 
+    def add_txt(self,cmd):
+        if isinstance(cmd,str):
+            self.mytext.insert(END,cmd+'\n')
+        if isinstance(cmd,list):
+            self.mytext.insert(END,'result is below' + '\n')
+            for i in range(len(cmd)):
+                self.mytext.insert(END,cmd[i]+'\n')
+        
+        self.mytext.yview(END)
+    
 
 
     def gettheintensiti(self):
@@ -214,34 +224,96 @@ class tab3:
             self.dismean = np.mean(self.buffer2)
             return self.dismean   
 
+    def nan_equal(self,a,b):
+        try: 
+            np.testing.assert_equal(a,b)
+        except AssertionError:
+            return False
+        return True
+
     def measureprocess(self):
+
+
+        
         try:
+
+
             #self.ser.reset_input_buffer()
             self.ser.write(str.encode("G91\r\n"))
-            if self.xcor.get() == '':
-                self.xcor.get() == 0
-            if self.ycor.get() == '':
-                self.ycor.get() == 0
-            self.ser.write(str.encode("G01"+'X'+self.xcor.get()+'Y'+self.ycor.get()+'\r\n'))
-            self.ser.write(str.encode("M0 P2500\r\n"))
+            if self.xbegn.get() == '':
+                self.xbegn.insert(0,'0')
+            if self.ybegn.get() == '':
+                self.ybegn.insert(0,'0')
 
-            for i in range(25):
-                print(self.ser.readline().decode("utf-8"))
-                #self.ser.write(str.encode("M0 P3500\r\n"))
-                print('moving to the position')
-                self.ser.write(str.encode("G01"+'X'+'1'+'\r\n'))
-                cod = 0
-                while (cod<25000 or cod == np.NaN) :
-                    #self.ser.write(str.encode("G01"+'Z'+'-0.1''\r\n'))
-                    self.ser.write(str.encode("M0 P1000\r\n"))
-                    cod = self.gettheintensiti()
-                    #print('dis now is ' + str(cod) + ' um')
-                    self.add_txt(cod)
-                    time.sleep(0.1)
-                self.add_txt('distance is'+ ' : '+ str(self.getthedistance())+ ' ' + 'um')
-                #self.ser.write(str.encode("G01"+'Z'+'5'+'\r\n'))
-                time.sleep(3.5)
+            if self.xlen.get() == '':
+                self.xlen.insert(0,'3')
+            if self.ylen.get() == '':
+                self.ylen.insert(0,'3') 
 
+            if self.xsample.get() == '':
+                self.xsample.insert(0,'2')
+            if self.ysample.get() == '':
+                self.ysample.insert(0,'2')
+            
+            lenx = int(self.xlen.get())
+            leny = int(self.ylen.get())
+            
+            numofy = int(self.ysample.get())
+            numofx = int(self.xsample.get())
+
+            deltax = lenx/numofx
+            deltay = leny/numofy
+            print(deltax,deltay)
+            deltax = str(deltax)
+            deltay = str(deltay)
+            self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
+        
+            resultlx = []
+            
+                  
+            for row in range(numofy):
+                for column in range(numofx):
+                    cod = 0
+                    while (cod<50 or self.nan_equal(cod,np.NaN)) :
+                        self.add_txt(str(cod))
+                        self.ser.write(str.encode("G01"+'Z'+'-0.1''\r\n'))
+                        self.ser.write(str.encode("M0 P1000\r\n"))
+                        cod = self.getthedistance()
+                        self.add_txt(str(cod))
+                        time.sleep(0.5)
+                    self.add_txt('distance is'+ ' : '+ str(self.getthedistance())+ ' ' + 'um')
+                    resultlx.append(str(self.getthedistance()))
+                    self.ser.write(str.encode("G01"+'Z'+'1.5'+'\r\n'))
+                    if (row%2)==0:
+                        self.add_txt('working on the even row')
+                        self.ser.write(str.encode("G01"+'X'+deltax+'\r\n'))
+                    if (row%2)!=0:
+                        self.add_txt('working on the odd row')
+                        self.ser.write(str.encode("G01"+'X'+'-'+deltax+'\r\n'))
+                    time.sleep(1)
+                if (row<numofy-1):
+                    self.add_txt('next y .....')
+                    self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
+                    time.sleep(1)
+            self.add_txt(resultlx)
+            print(resultlx)
+            #test code 
+            # for row in range(numofy):
+            #     for column in range(numofx):
+            #         if (row%2)==0:
+            #             self.add_txt('working on the even row')
+            #             self.ser.write(str.encode("G01"+'X'+deltax+'\r\n'))
+            #         if (row%2)!=0:
+            #             self.add_txt('working on the odd row')
+            #             self.ser.write(str.encode("G01"+'X'+'-'+deltax+'\r\n'))
+            #         time.sleep(1)
+            #     if (row<numofy-1):
+            #         self.add_txt('next y .....')
+            #         self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
+            #         time.sleep(1)
+        
+
+            
         except serial.serialutil.PortNotOpenError:
             self.add_txt('port closed')   
         except AttributeError:
@@ -279,9 +351,9 @@ class tab3:
 
     def connect3d(self):
         try:
-            self.ser = serial.Serial(self.mylist.selection_get(), 115200)
+            self.ser = serial.Serial(self.mylist.selection_get().strip(), 115200)
 
-            self.add_txt(self.mylist.selection_get()+' '+"connected")
+            self.add_txt(self.mytext.selection_get()+' '+"connected")
         except serial.serialutil.SerialException:
 
             self.add_txt('port'+ ' '+ self.mylist.selection_get().strip() +' '+'can not connect' )
