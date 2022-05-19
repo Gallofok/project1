@@ -279,8 +279,8 @@ class tab3:
             numofy = int(self.ysample.get())
             numofx = int(self.xsample.get())
 
-            deltax = lenx/numofx
-            deltay = leny/numofy
+            deltax = lenx/(numofx-1)
+            deltay = leny/(numofy-1)
 
             dsafe = 6
             steplimit = (int(self.zdis.get())-dsafe)/0.1
@@ -288,74 +288,73 @@ class tab3:
             print(deltax,deltay)
             deltax = deltax
             deltay = deltay
-            self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
+            # self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
 
             resultlx = []
             coordinats = []
-            print('step lim is     '+str(steplimit))
-            self.abspos()      
-            for row in range(numofy):
-                for column in range(numofx):
-                    if (row%2)==0:
-                        self.add_txt('working on the even row')
-                        self.ser.write(str.encode("G01"+'X'+str(column*deltax)+'\r\n'))
-                    if (row%2)!=0:
-                        self.add_txt('working on the odd row')
-                        self.ser.write(str.encode("G01"+'X'+'-'+str(column*deltax)+'\r\n'))
-
-                    cod = 0
-                    step = 0
-                    while ( step < steplimit) :
-                        self.ser.write(str.encode("G01"+'Z'+'-0.1''\r\n'))
-                        self.ser.write(str.encode("M0 P500\r\n"))
-                        cod = self.getthedistance()
-                        self.add_txt(str(cod))
-                        
-                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 50):
-                            self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
-                            resultlx.append(float(cod))
-                            print(type(cod))
-                            cor = self.abspos()
-                            print(cor)
-                            coordinats.append(cor)
-                            step = steplimit
-
-                        step=step+1    
-                        
-                    self.ser.write(str.encode("G01"+'Z'+'1.5'+'\r\n'))
-
-
-
-                if (row<numofy-1):
-                    self.add_txt('next y .....')
-                    self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
-
-
-            self.add_txt(resultlx)
-            self.add_txt(coordinats)
-            print(resultlx)
-            print(coordinats)
-
-            #test code 
+            # print('step lim is     '+str(steplimit))
+            # self.abspos()      
             # for row in range(numofy):
             #     for column in range(numofx):
             #         if (row%2)==0:
             #             self.add_txt('working on the even row')
-
-            #             self.add_txt('moving to ' + 'x'+ str(column*deltax)+'\r\n')    
-            #             time.sleep(1)
+            #             self.ser.write(str.encode("G01"+'X'+str(column*deltax)+'\r\n'))
             #         if (row%2)!=0:
             #             self.add_txt('working on the odd row')
-            #             self.add_txt('moving to ' + 'x'+'-'+str(column*deltax)+'\r\n')
-            #             time.sleep(1)
+            #             self.ser.write(str.encode("G01"+'X'+'-'+str(column*deltax)+'\r\n'))
 
-            #         self.add_txt('let me do sth')
-            #         time.sleep(1)
+            #         cod = 0
+            #         step = 0
+            #         while ( step < steplimit) :
+            #             self.ser.write(str.encode("G01"+'Z'+'-0.1''\r\n'))
+            #             self.ser.write(str.encode("M0 P500\r\n"))
+            #             cod = self.getthedistance()
+            #             self.add_txt(str(cod))
+                        
+            #             if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 50):
+            #                 self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
+            #                 resultlx.append(float(cod))
+            #                 print(type(cod))
+            #                 cor = self.abspos()
+            #                 print(cor)
+            #                 coordinats.append(cor)
+            #                 step = steplimit
+
+            #             step=step+1    
+                        
+            #         self.ser.write(str.encode("G01"+'Z'+'1.5'+'\r\n'))
+
+
+
             #     if (row<numofy-1):
             #         self.add_txt('next y .....')
+            #         self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
 
-            #         time.sleep(1)
+
+            # self.add_txt(resultlx)
+            # self.add_txt(coordinats)
+            # print(resultlx)
             # print(coordinats)
+
+            #test code 
+            for row in range(numofy):
+                for column in range(numofx):
+                    if (row%2)==0:
+                        self.add_txt('working on the even row')
+                        self.add_txt('moving to ' + 'x'+ str(column*deltax)+'\r\n')    
+                        time.sleep(1)
+                    if (row%2)!=0:
+                        self.add_txt('working on the odd row')
+                        self.add_txt('moving to ' + 'x'+'-'+str(column*deltax)+'\r\n')
+                        time.sleep(1)
+
+                    self.add_txt('let me do sth')
+                    time.sleep(1)
+                if (row<numofy-1):
+                    self.add_txt('next y .....')
+
+                    time.sleep(1)
+            print(coordinats)
 
             
         except serial.serialutil.PortNotOpenError:
