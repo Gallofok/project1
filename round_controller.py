@@ -12,7 +12,7 @@ class round_controller:
 
         self.centrepos = (200, 200)
         self.tri1, self.tri2, self.tri3, self.tri4 = self.createfourtriangle(centerpos=self.centrepos)
-        self.rad = (100, 80, 60)
+        self.rad = (60, 40, 20)
         self.angstart = (45, 135, 225, -45)
         self.angend = (135, 225, 315, 45)
         self.arclise = []
