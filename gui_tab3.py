@@ -52,13 +52,16 @@ class tab3:
         self.ybegn.grid(row = 1,column=1)
         self.L2 = Label(self.measureframe, text="ybeginn")
         self.L2.grid(row = 1,column=0)
+
+
+
         self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause',command = self.stoppro,width=25)
 
 
 
-        self.measure.grid(row = 6,column=1)
-        self.emstop.grid(row = 7,column=1)
+        self.measure.grid(row = 7,column=1)
+        self.emstop.grid(row = 8,column=1)
         self.measureframe.grid(row = 3,column=1)
 
 
@@ -83,8 +86,10 @@ class tab3:
         self.ysample.grid(row = 5,column=1)
 
 
-
-
+        self.L7 = Label(self.measureframe, text="z dis approx")
+        self.L7.grid(row = 6,column=0)
+        self.zdis = Entry(self.measureframe)
+        self.zdis.grid(row=6,column=1)
 
         # add some buttons
         self.Buttonx = Button(self.buttonframe, text="A axis", padx=50,
@@ -160,7 +165,7 @@ class tab3:
         #this code is for the detector
         self.chr = chr_connection.CHR_connection('IP: 169.254.2.217',1)
         self.res = self.chr.send_command('$MMD 0')
-        self.n_sample = 200
+        self.n_sample = 1000
 
         """
         infor tabel
@@ -173,7 +178,10 @@ class tab3:
         self.clss = Button(self.labe,command=self.cls,text='clear')
         self.clss.pack(side = LEFT)
 
-        self.reader = Button(self.labe,command=self.readcmd,text='sent')
+        self.sender = Button(self.labe,command=self.sendcmd,text='sendcmd')
+        self.sender.pack(side = BOTTOM)
+
+        self.reader = Button(self.labe,command=self.abspos,text='abspos')
         self.reader.pack(side = BOTTOM)
 
         self.mytext.pack( side = TOP, fill = BOTH )
@@ -184,8 +192,18 @@ class tab3:
 
     def cls(self):
         self.mytext.delete("1.0","end")
-    def readcmd(self):
-        #this code read the last line of feedback
+    def abspos(self):
+        try:
+            self.ser.write(str.encode('M114'+"\r\n"))
+            x = self.ser.read().decode("UTF-8")
+            print(x)
+            self.add_txt(x)
+            
+            return x
+        except AttributeError:
+            self.add_txt('noting connected yet')
+    def sendcmd(self):
+        #this code sent the last line of feedback
         try:
             a = self.mytext.get("1.0", "end")
             idx = len(a.split('\n'))
@@ -194,11 +212,12 @@ class tab3:
             print(want)
         except AttributeError:
             self.add_txt('noting connected yet')
+    
 
     def add_txt(self,cmd):
         if isinstance(cmd,str):
             self.mytext.insert(END,cmd+'\n')
-        if isinstance(cmd,list):
+        if isinstance(str(cmd),list):
             self.mytext.insert(END,'result is below' + '\n')
             for i in range(len(cmd)):
                 self.mytext.insert(END,cmd[i]+'\n')
@@ -231,13 +250,9 @@ class tab3:
             return False
         return True
 
-    def measureprocess(self):
-
-
-        
+    def measureprocess(self):    
         try:
-
-
+        
             #self.ser.reset_input_buffer()
             self.ser.write(str.encode("G91\r\n"))
             if self.xbegn.get() == '':
@@ -246,15 +261,18 @@ class tab3:
                 self.ybegn.insert(0,'0')
 
             if self.xlen.get() == '':
-                self.xlen.insert(0,'3')
+                self.xlen.insert(0,'10')
             if self.ylen.get() == '':
-                self.ylen.insert(0,'3') 
+                self.ylen.insert(0,'10') 
 
             if self.xsample.get() == '':
                 self.xsample.insert(0,'2')
             if self.ysample.get() == '':
                 self.ysample.insert(0,'2')
-            
+
+
+            if self.zdis.get() == '':
+                self.zdis.insert(0,'20')
             lenx = int(self.xlen.get())
             leny = int(self.ylen.get())
             
@@ -263,55 +281,77 @@ class tab3:
 
             deltax = lenx/numofx
             deltay = leny/numofy
-            print(deltax,deltay)
+
+            # dsafe = 6
+            # steplimit = (int(self.zdis.get())-dsafe)/0.1
+
+            # print(deltax,deltay)
             deltax = str(deltax)
             deltay = str(deltay)
-            self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
-        
-            resultlx = []
-            
-                  
-            for row in range(numofy):
-                for column in range(numofx):
-                    cod = 0
-                    while (cod<50 or self.nan_equal(cod,np.NaN)) :
-                        self.add_txt(str(cod))
-                        self.ser.write(str.encode("G01"+'Z'+'-0.1''\r\n'))
-                        self.ser.write(str.encode("M0 P1000\r\n"))
-                        cod = self.getthedistance()
-                        self.add_txt(str(cod))
-                        time.sleep(0.5)
-                    self.add_txt('distance is'+ ' : '+ str(self.getthedistance())+ ' ' + 'um')
-                    resultlx.append(str(self.getthedistance()))
-                    self.ser.write(str.encode("G01"+'Z'+'1.5'+'\r\n'))
-                    if (row%2)==0:
-                        self.add_txt('working on the even row')
-                        self.ser.write(str.encode("G01"+'X'+deltax+'\r\n'))
-                    if (row%2)!=0:
-                        self.add_txt('working on the odd row')
-                        self.ser.write(str.encode("G01"+'X'+'-'+deltax+'\r\n'))
-                    time.sleep(1)
-                if (row<numofy-1):
-                    self.add_txt('next y .....')
-                    self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
-                    time.sleep(1)
-            self.add_txt(resultlx)
-            print(resultlx)
-            #test code 
+            # self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
+
+            # resultlx = []
+            coordinats = []
+            # print('step lim is     '+str(steplimit))
+            # self.abspos()      
             # for row in range(numofy):
             #     for column in range(numofx):
+            #         cod = 0
+            #         step = 0
+            #         while ( step < steplimit) :
+            #             self.ser.write(str.encode("G01"+'Z'+'-0.1''\r\n'))
+            #             self.ser.write(str.encode("M0 P500\r\n"))
+            #             cod = self.getthedistance()
+            #             self.add_txt(str(cod))
+                        
+            #             if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 50):
+            #                 self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
+            #                 resultlx.append(float(cod))
+            #                 print(type(cod))
+            #                 cor = self.abspos()
+            #                 print(cor)
+            #                 coordinats.append(cor)
+            #                 step = steplimit
+
+            #             step=step+1    
+                        
+            #         self.ser.write(str.encode("G01"+'Z'+'1.5'+'\r\n'))
             #         if (row%2)==0:
             #             self.add_txt('working on the even row')
             #             self.ser.write(str.encode("G01"+'X'+deltax+'\r\n'))
             #         if (row%2)!=0:
             #             self.add_txt('working on the odd row')
             #             self.ser.write(str.encode("G01"+'X'+'-'+deltax+'\r\n'))
-            #         time.sleep(1)
+
             #     if (row<numofy-1):
             #         self.add_txt('next y .....')
             #         self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
-            #         time.sleep(1)
-        
+
+
+            # self.add_txt(resultlx)
+            # self.add_txt(coordinats)
+            # print(resultlx)
+            # print(coordinats)
+
+            #test code 
+            for row in range(numofy):
+                for column in range(numofx-1):
+                    print(row,column)
+
+                    if (row%2)==0:
+                        self.add_txt('working on the even row')
+                        self.ser.write(str.encode("G01"+'X'+deltax+'\r\n'))
+                        time.sleep(1)
+                    if (row%2)!=0:
+                        self.add_txt('working on the odd row')
+                        self.ser.write(str.encode("G01"+'X'+'-'+deltax+'\r\n'))
+                        time.sleep(1)
+                    time.sleep(1)
+                if (row<numofy-1):
+                    self.add_txt('next y .....')
+                    self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
+                    time.sleep(1)
+            print(coordinats)
 
             
         except serial.serialutil.PortNotOpenError:
