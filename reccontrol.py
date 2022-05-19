@@ -13,14 +13,14 @@ class reccontrol():
         for i in range(6):
             
             if np.abs(i-2.5) < 1:
-                self.trilist.append(self.canvas.create_rectangle(50,50+i*50,50+100,50+50+i*50,fill = self.colorlis[0],activefill = self.colorlishighlight[0]))
+                self.trilist.append(self.canvas.create_rectangle(50,50+i*50,50+100,50+50+i*50,fill = self.colorlis[2],activefill = self.colorlishighlight[2]))
                 
             
             if np.abs(i-2.5) < 2 and np.abs(i-2.5) > 1:
                  self.trilist.append(self.canvas.create_rectangle(50+0,50+i*50,50+100,50+50+i*50,fill = self.colorlis[1],activefill = self.colorlishighlight[1]))
             
             if np.abs(i-2.5) > 2:
-                 self.trilist.append(self.canvas.create_rectangle(50+0,50+i*50,50+100,50+50+i*50,fill = self.colorlis[2],activefill = self.colorlishighlight[2]))
+                 self.trilist.append(self.canvas.create_rectangle(50+0,50+i*50,50+100,50+50+i*50,fill = self.colorlis[0],activefill = self.colorlishighlight[0]))
 
         self.canvas.create_text(175,100,text='-z')
         self.canvas.create_text(175,300,text='+z')
