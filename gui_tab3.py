@@ -266,18 +266,18 @@ class tab3:
                 self.ybegn.insert(0,'0')
 
             if self.xlen.get() == '':
-                self.xlen.insert(0,'10')
+                self.xlen.insert(0,'5')
             if self.ylen.get() == '':
                 self.ylen.insert(0,'10') 
 
             if self.xsample.get() == '':
-                self.xsample.insert(0,'3')
+                self.xsample.insert(0,'2')
             if self.ysample.get() == '':
-                self.ysample.insert(0,'1')
+                self.ysample.insert(0,'2')
 
 
             if self.zdis.get() == '':
-                self.zdis.insert(0,'7')
+                self.zdis.insert(0,'15')
             lenx = int(self.xlen.get())
             leny = int(self.ylen.get())
             
@@ -299,8 +299,8 @@ class tab3:
             steplimit = (int(self.zdis.get())-dsafe)/0.1
 
             print(deltax,deltay)
-            deltax = deltax
-            deltay = deltay
+            deltax = str(deltax)
+            deltay = str(deltay)
             self.ser.write(str.encode("G91\r\n"))
             self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
 
@@ -314,32 +314,32 @@ class tab3:
                     if (row%2)==0:
                         self.add_txt('working on the even row')
                         if (column != 0):
-                            self.ser.write(str.encode("G01"+'X'+str(deltax)+'\r\n'))
+                            self.ser.write(str.encode("G01"+'X'+deltax+'\r\n'))
                     if (row%2)!=0:
                         self.add_txt('working on the odd row')
                         if (column != 0):
-                            self.ser.write(str.encode("G01"+'X'+'-'+str(deltax)+'\r\n'))
+                            self.ser.write(str.encode("G01"+'X'+'-'+deltax+'\r\n'))
 
                     cod = 0
                     step = 0
                     while ( step < steplimit) :
                         self.ser.write(str.encode("G01"+'Z'+'-0.1''\r\n'))
-                        self.ser.write(str.encode("M0 P500\r\n"))
+                        #self.ser.write(str.encode("M0 P500\r\n"))
                         cod = self.getthedistance()
                         self.add_txt(str(cod))
                         
                         if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 50):
                             self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
-                            resultlx.append(cod)
-                            _,currentz = self.abspos()
+                            co,currentz = self.abspos()
+                            resultlx.append(str(cod))
+                            coordinats.append(co)
                             zpos = str(float(currentz)+2) 
                             print('zpos now is   '+zpos)
                             step = steplimit
 
                         step=step+1
 
-                    co= coordinats.append(self.abspos())
-                    print(co)
+
                     self.ser.write(str.encode("G90\r\n"))
                     print('gogog')    
                     self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
@@ -347,6 +347,7 @@ class tab3:
 
 
                 if (row<numofy-1):
+                    self.ser.write(str.encode("G91\r\n"))
                     self.add_txt('next y .....')
                     self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
 
