@@ -57,11 +57,12 @@ class tab3:
 
         self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause',command = self.stoppro,width=25)
-
+        self.emstart = Button(self.measureframe,text='start',command = self.start,width=25)
 
 
         self.measure.grid(row = 7,column=1)
         self.emstop.grid(row = 8,column=1)
+        self.emstart.grid(row = 9,column=1)
         self.measureframe.grid(row = 3,column=1)
 
 
@@ -194,12 +195,14 @@ class tab3:
         self.mytext.delete("1.0","end")
     def abspos(self):
         try:
+            self.ser.flushInput()
             self.ser.flushOutput()
             self.ser.write(str.encode('M114'+"\r\n"))
-            x = self.ser.read_all().decode("UTF-8")
-            print(x)
-            self.add_txt(x)
-            return x
+            cor = self.ser.readline().decode("UTF-8")
+            zpos = cor[19:24]
+            self.add_txt(zpos)
+            print(cor[:24])
+            return cor[:24],zpos
         except AttributeError:
             self.add_txt('noting connected yet')
     def sendcmd(self):
@@ -252,9 +255,11 @@ class tab3:
 
     def measureprocess(self):    
         try:
+            self.ser.flushInput()
+            self.ser.flushOutput()            
+            _,zpos = self.abspos()
+            print('zpos is ' + zpos)
         
-            self.ser.reset_input_buffer()
-            self.ser.write(str.encode("G91\r\n"))
             if self.xbegn.get() == '':
                 self.xbegn.insert(0,'0')
             if self.ybegn.get() == '':
@@ -266,13 +271,13 @@ class tab3:
                 self.ylen.insert(0,'10') 
 
             if self.xsample.get() == '':
-                self.xsample.insert(0,'2')
+                self.xsample.insert(0,'3')
             if self.ysample.get() == '':
-                self.ysample.insert(0,'2')
+                self.ysample.insert(0,'1')
 
 
             if self.zdis.get() == '':
-                self.zdis.insert(0,'20')
+                self.zdis.insert(0,'7')
             lenx = int(self.xlen.get())
             leny = int(self.ylen.get())
             
@@ -296,20 +301,24 @@ class tab3:
             print(deltax,deltay)
             deltax = deltax
             deltay = deltay
+            self.ser.write(str.encode("G91\r\n"))
             self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
 
             resultlx = []
             coordinats = []
             print('step lim is     '+str(steplimit))
-            self.abspos()      
+    
             for row in range(numofy):
                 for column in range(numofx):
+                    self.ser.write(str.encode("G91\r\n"))
                     if (row%2)==0:
                         self.add_txt('working on the even row')
-                        self.ser.write(str.encode("G01"+'X'+str(column*deltax)+'\r\n'))
+                        if (column != 0):
+                            self.ser.write(str.encode("G01"+'X'+str(deltax)+'\r\n'))
                     if (row%2)!=0:
                         self.add_txt('working on the odd row')
-                        self.ser.write(str.encode("G01"+'X'+'-'+str(column*deltax)+'\r\n'))
+                        if (column != 0):
+                            self.ser.write(str.encode("G01"+'X'+'-'+str(deltax)+'\r\n'))
 
                     cod = 0
                     step = 0
@@ -321,16 +330,19 @@ class tab3:
                         
                         if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 50):
                             self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
-                            resultlx.append(float(cod))
-                            print(type(cod))
-                            cor = self.abspos()
-                            print(cor)
-                            coordinats.append(cor)
+                            resultlx.append(cod)
+                            _,currentz = self.abspos()
+                            zpos = str(float(currentz)+2) 
+                            print('zpos now is   '+zpos)
                             step = steplimit
 
-                        step=step+1    
-                        
-                    self.ser.write(str.encode("G01"+'Z'+'1.5'+'\r\n'))
+                        step=step+1
+
+                    co= coordinats.append(self.abspos())
+                    print(co)
+                    self.ser.write(str.encode("G90\r\n"))
+                    print('gogog')    
+                    self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
 
 
 
@@ -374,13 +386,19 @@ class tab3:
     def stoppro(self):
         if(self.ser != None):
 
-            self.add_txt('disconnect')
-            self.ser.close()
-            self.ser = None
+            self.add_txt('stop')
+            self.ser.write(str.encode("M0\r\n"))
         else:
 
             self.add_txt('no port connected now')
-    
+    def start(self):
+        if(self.ser != None):
+
+            self.add_txt('start')
+            self.ser.write(str.encode("M108\r\n"))
+        else:
+
+            self.add_txt('no port connected now')
     def linearvelcontrol(self, cmd):
         self.barbegin = 60
         self.barend = 500
