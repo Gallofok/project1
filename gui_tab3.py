@@ -1,3 +1,5 @@
+#https://research.facebook.com/publications/control-strategies-for-physically-simulated-characters-performing-two-player-competitive-sports/
+
 from calendar import c
 import threading
 from tkinter import *
