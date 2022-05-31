@@ -5,11 +5,12 @@ import tkinter.filedialog
 import round_controller
 import reccontrol
 import serial
-import time
 import numpy as np
 import chr_dll2_connection as chr_connection
-
-
+from matplotlib.figure import Figure 
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,  
+NavigationToolbar2Tk)
+import re
 
 class tab3:
 
@@ -167,6 +168,7 @@ class tab3:
         self.chr = chr_connection.CHR_connection('IP: 169.254.2.217',1)
         self.res = self.chr.send_command('$MMD 0')
         self.n_sample = 1000
+    
 
         """
         infor tabel
@@ -190,6 +192,82 @@ class tab3:
 
         self.labe.grid(row=4,column=0)
 
+        self.graph = Frame(self.frame)
+
+        self.zgraph = Button(self.graph,command=self.zplot,text='zdiagramm')
+        self.zgraph.pack(side = BOTTOM)
+
+        self.dzgraph = Button(self.graph,command=self.dzplot,text='dzdiagram')
+        self.dzgraph.pack(side = BOTTOM)
+
+        self.graph.grid(row=4,column=1)
+
+
+        # self.resultlx = ['197.49173674011232', '198.06531217193603', '201.53500929260255']
+        # self.zcoordinats = ['22.90', '22.80', '22.50']
+        # self.xcoordinats = ['10.0', '15.0', '20.0']
+
+
+
+    def dzplot(self): 
+  
+        window = Toplevel()
+        fig = Figure(figsize = (5, 5), 
+                    ) 
+        x = [float(i) for i in self.xcoordinats]
+        
+        z = [float(i) for i in self.resultlx] 
+    
+        
+        plot1 = fig.add_subplot(111) 
+    
+        
+        plot1.plot(x,z,'.') 
+    
+        
+        
+        canvas = FigureCanvasTkAgg(fig, 
+                                master = window)   
+        canvas.draw() 
+    
+        
+        canvas.get_tk_widget().pack() 
+    
+        
+        toolbar = NavigationToolbar2Tk(canvas, 
+                                    window) 
+        toolbar.update()         
+        canvas.get_tk_widget().pack() 
+
+    def zplot(self): 
+  
+        window = Toplevel()
+        fig = Figure(figsize = (5, 5), 
+                    ) 
+        x = [float(i) for i in self.xcoordinats]
+        
+        z = [float(i) for i in self.zcoordinats] 
+    
+        
+        plot1 = fig.add_subplot(111) 
+    
+        
+        plot1.plot(x,z,'.') 
+    
+        
+        
+        canvas = FigureCanvasTkAgg(fig, 
+                                master = window)   
+        canvas.draw() 
+    
+        
+        canvas.get_tk_widget().pack() 
+    
+        
+        toolbar = NavigationToolbar2Tk(canvas, 
+                                    window) 
+        toolbar.update()         
+        canvas.get_tk_widget().pack() 
 
     def cls(self):
         self.mytext.delete("1.0","end")
@@ -200,9 +278,10 @@ class tab3:
             self.ser.write(str.encode('M114'+"\r\n"))
             cor = self.ser.readline().decode("UTF-8")
             zpos = cor[19:24]
+            xpos = cor[2:6]
             self.add_txt(zpos)
             print(cor[:24])
-            return cor[:24],zpos
+            return cor[:24],zpos,xpos
         except AttributeError:
             self.add_txt('noting connected yet')
     def sendcmd(self):
@@ -257,7 +336,7 @@ class tab3:
         try:
             self.ser.flushInput()
             self.ser.flushOutput()            
-            _,zpos = self.abspos()
+            _,zpos,xpos = self.abspos()
             print('zpos is ' + zpos)
         
             if self.xbegn.get() == '':
@@ -304,8 +383,7 @@ class tab3:
             self.ser.write(str.encode("G91\r\n"))
             self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
 
-            resultlx = []
-            coordinats = []
+
             print('step lim is     '+str(steplimit))
     
             for row in range(numofy):
@@ -328,20 +406,26 @@ class tab3:
                         cod = self.getthedistance()
                         self.add_txt(str(cod))
                         
-                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 50):
+                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 80):
                             self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
-                            co,currentz = self.abspos()
-                            resultlx.append(str(cod))
-                            coordinats.append(co)
-                            zpos = str(float(currentz)+2) 
-                            print('zpos now is   '+zpos)
+                            co,currentz,currentx = self.abspos()
+                            self.resultlx.append(str(cod))
+                            self.xcoordinats.append(currentx)
+                            self.zcoordinats.append(currentz)
+                            goup = 1
+
+                            zpos = str(float(currentz)+goup)
+                             
+                            self.add_txt('zpos now is   '+ zpos)
+                            steplimit = 2*goup/0.1
+                            self.add_txt('steplim now is ' + str(steplimit))
                             step = steplimit
 
                         step=step+1
 
 
                     self.ser.write(str.encode("G90\r\n"))
-                    print('gogog')    
+                    self.add_txt('gogog')    
                     self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
 
 
@@ -352,11 +436,9 @@ class tab3:
                     self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
 
 
-            self.add_txt(resultlx)
-            self.add_txt(coordinats)
-            print(resultlx)
-            print(coordinats)
-
+            print(self.xcoordinats)
+            print(self.resultlx)
+            print(self.zcoordinats)
             #test code 
             # for row in range(numofy):
             #     for column in range(numofx):
@@ -400,28 +482,10 @@ class tab3:
         else:
 
             self.add_txt('no port connected now')
-    def linearvelcontrol(self, cmd):
-        self.barbegin = 60
-        self.barend = 500
-        self.scale = Scale(self.buttonframe, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn,
-                           to=self.barend, command=self.changethroughslide, length=400)
-        self.scale.grid(row=4, column=1)
-        self.myLabel.config(text=cmd)
-
-    def angularvelcontrol(self, cmd):
-        self.myLabel.config(text=cmd)
-        self.barbeginn = 0
-        self.barend = 180
-        self.scale = Scale(self.buttonframe, variable=self.var, orient=HORIZONTAL, from_=self.barbeginn,
-                           to=self.barend, command=self.changethroughslide, length=400)
-        self.scale.grid(row=4, column=1)
-
-    def confirm(self):
-        self.scale.set(self.e.get())
 
     def connect3d(self):
         try:
-            self.ser = serial.Serial(self.mylist.selection_get().strip(), 115200)
+            self.ser = serial.Serial(self.mylist.selection_get().strip(), 115200,)
 
             self.add_txt(self.mytext.selection_get()+' '+"connected")
         except serial.serialutil.SerialException:
@@ -431,10 +495,10 @@ class tab3:
 
             self.add_txt('one port muss be selected first')
 
-
     def Homexyz(self):
         try:
             self.ser.write(str.encode("G28\r\n"))
+            self.add_txt('homing')
         except AttributeError:
             self.add_txt('no machine connected')
     def disconnect3d(self):
