@@ -10,21 +10,29 @@ import chr_dll2_connection as chr_connection
 from matplotlib.figure import Figure 
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,  
 NavigationToolbar2Tk)
-import re
+
 
 class tab3:
 
     def __init__(self, root, frame):
+
+
         self.root = root
         self.frame = frame
         self.var = DoubleVar()
         self.barbeginn = 0
         self.barend = 500
-        self.buttonframe = LabelFrame(self.frame)
+        #self.buttonframe = LabelFrame(self.frame)
         self.portframe = LabelFrame(self.frame,width=400,height=200)
         self.measureframe = LabelFrame(self.frame,width=400,height=200)
-        self.myLabel = Label(self.frame, text=' ')
-        self.e = Entry(self.buttonframe, width=20, font=('Helvetica', 25))
+        #self.myLabel = Label(self.frame, text=' ')
+        #self.e = Entry(self.buttonframe, width=20, font=('Helvetica', 25))         
+        self.resultlx = []
+        self.zcoordinats = []
+        self.xcoordinats = []
+
+        # this is for the port
+        #there are 6 ports can be choosen 
         self.mylist = Listbox(self.portframe,width=67)
         for line in range(6):
             str1 = "COM" + str(line)
@@ -33,9 +41,6 @@ class tab3:
             self.mylist.insert(END,modify)
         self.mylist.pack(fill=X)
         
-
-
-
         self.portchoice = Button(self.portframe, text="connect", width=50,command=self.connect3d)
         self.portchoice.pack()
         self.home = Button(self.portframe, text="home", width=50,command=self.Homexyz)
@@ -44,9 +49,11 @@ class tab3:
         self.disconnecrt.pack()
         self.portframe.grid(row=3,column=0)
 
-        #measurepart
+
+        #half auto measure part it includes the key measure parameters 
         self.meatype = StringVar()
         self.meatype.set('type1')
+        self.meafun = self.measureprocess1
         self.xbegn = Entry(self.measureframe)
         self.xbegn.grid(row = 0,column=1)
         self.L0 = Label(self.measureframe, text="choose measure type")
@@ -56,11 +63,11 @@ class tab3:
         self.ybegn.grid(row = 1,column=1)
         self.L2 = Label(self.measureframe, text="ybeginn")
         self.L2.grid(row = 1,column=0)
-        self.meachoice1 = Radiobutton(self.measureframe,text = 'type1',value='type1',variable=self.meatype,command=self.showchoice)
-        self.meachoice2 = Radiobutton(self.measureframe,text = 'type2',value='type2',variable=self.meatype,command=self.showchoice)
+        self.meachoice1 = Radiobutton(self.measureframe,text = 'type1(high to low)',value='type1',variable=self.meatype,command=self.funchoice)
+        self.meachoice2 = Radiobutton(self.measureframe,text = 'type2(low to high)',value='type2',variable=self.meatype,command=self.funchoice)
 
 
-        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess1).start(),width = 25)
+        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.meafun).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause',command = self.stoppro,width=25)
         self.emstart = Button(self.measureframe,text='start',command = self.start,width=25)
 
@@ -101,18 +108,20 @@ class tab3:
         self.L7.grid(row = 6,column=0)
         self.zdis = Entry(self.measureframe)
         self.zdis.grid(row=6,column=1)
+        
+
 
         # add some buttons
-        self.Buttonx = Button(self.buttonframe, text="A axis", padx=50,
-                              command=lambda cmd="A axis selected": self.clickit(cmd))
-        self.Buttony = Button(self.buttonframe, text="B axis", padx=50,
-                              command=lambda cmd="B axis selected": self.clickit(cmd))
-        self.Buttonz = Button(self.buttonframe, text="C axis", padx=50,
-                              command=lambda cmd="C axis selected": self.clickit(cmd))
-        self.Buttonminus = Button(self.buttonframe, text="-", padx=50,
-                                  command=lambda cmd="movement minus selected": self.clickit(cmd))
-        self.Buttonplus = Button(self.buttonframe, text="+", padx=50,
-                                 command=lambda cmd="movement plus selected": self.clickit(cmd))
+        # self.Buttonx = Button(self.buttonframe, text="A axis", padx=50,
+        #                       command=lambda cmd="A axis selected": self.clickit(cmd))
+        # self.Buttony = Button(self.buttonframe, text="B axis", padx=50,
+        #                       command=lambda cmd="B axis selected": self.clickit(cmd))
+        # self.Buttonz = Button(self.buttonframe, text="C axis", padx=50,
+        #                       command=lambda cmd="C axis selected": self.clickit(cmd))
+        # self.Buttonminus = Button(self.buttonframe, text="-", padx=50,
+        #                           command=lambda cmd="movement minus selected": self.clickit(cmd))
+        # self.Buttonplus = Button(self.buttonframe, text="+", padx=50,
+        #                          command=lambda cmd="movement plus selected": self.clickit(cmd))
 
 
 
@@ -121,31 +130,27 @@ class tab3:
         # put the button in the plattform
 
 
-        self.Buttonx.grid(row=0, column=0)
-        self.Buttony.grid(row=0, column=1)
-        self.Buttonz.grid(row=0, column=2)
-        self.Buttonplus.grid(row=1, column=0)
+        # self.Buttonx.grid(row=0, column=0)
+        # self.Buttony.grid(row=0, column=1)
+        # self.Buttonz.grid(row=0, column=2)
+        # self.Buttonplus.grid(row=1, column=0)
+        # self.Buttonminus.grid(row=1, column=2)
 
-        self.Buttonminus.grid(row=1, column=2)
 
-        self.myLabel.grid(row=6, column=0)
-        self.e.grid(row=3, column=1)
+        #self.myLabel.grid(row=6, column=0)
+        #self.e.grid(row=3, column=1)
 
+        
         self.ser = None
-
-
-        self.jj = LabelFrame(self.frame)
-        self.jj.grid(row=1, column=0)
-        self.jg = LabelFrame(self.frame)
-        self.jg.grid(row=1, column=1)
+        self.roundconframe = LabelFrame(self.frame)
+        self.roundconframe.grid(row=1, column=0)
+        self.rectanframe = LabelFrame(self.frame)
+        self.rectanframe.grid(row=1, column=1)
         
-
-        self.control = round_controller.round_controller(self.jj, self.jj)
-        """
-        round button control binding 
+        self.control = round_controller.round_controller(self.roundconframe, self.roundconframe)
+ 
+        #round button control bind with the moving function
         
-        """
-
         self.control.canvas.tag_bind(self.control.arclise[0], '<Button-1>', self.ymovingplus2)
         self.control.canvas.tag_bind(self.control.arclise[1], '<Button-1>', self.ymovingplus1)
         self.control.canvas.tag_bind(self.control.arclise[2], '<Button-1>', self.ymovingplus0)
@@ -164,7 +169,7 @@ class tab3:
 
 
 
-        self.control2 = reccontrol.reccontrol(self.jg,self.jg)
+        self.control2 = reccontrol.reccontrol(self.rectanframe,self.rectanframe)
         self.control2.canvas.tag_bind(self.control2.trilist[0], '<Button-1>', self.zmovingminus2)
         self.control2.canvas.tag_bind(self.control2.trilist[1], '<Button-1>', self.zmovingminus1)
         self.control2.canvas.tag_bind(self.control2.trilist[2], '<Button-1>', self.zmovingminus0)
@@ -178,10 +183,8 @@ class tab3:
         self.res = self.chr.send_command('$MMD 0')
         self.n_sample = 1000
     
+        #it will show the real time information while measurement running
 
-        """
-        infor tabel
-        """
         self.labe = Frame(self.frame)
         self.scrollbar = Scrollbar(self.labe)
         self.scrollbar.pack( side = RIGHT, fill = Y )
@@ -212,23 +215,21 @@ class tab3:
 
         self.dcls = Button(self.graph,command=self.clean,text='clean')
         self.dcls.pack(side = TOP)
-
         self.graph.grid(row=4,column=1)
 
-# ['44.8', '47.3', '49.8', '52.3', '54.8']
-# ['118.70212538146973', '177.71769465637206', '206.8756123352051', '191.39453305053712', '159.31534875488282']
-# ['12.90', '13.60', '14.20', '14.70', '15.10']
-        self.resultlx = []
-        self.zcoordinats = []
-        self.xcoordinats = []
+
+
     def clean(self):
         self.resultlx = []
         self.xcoordinats = []
         self.zcoordinats = []
-    def showchoice(self):
-        print (self.meatype.get())
+    def funchoice(self):
+        if(self.meatype.get() == 'type1'):self.meafun = self.measureprocess1
+        if(self.meatype.get() == 'type2'):self.meafun = self.measureprocess2
+        self.add_txt(self.meatype.get())
+
     def dzplot(self): 
-  
+
         window = Toplevel()
         window.title('dz value')
         fig = Figure(figsize = (8,5), 
@@ -468,26 +469,6 @@ class tab3:
             print(self.xcoordinats)
             print(self.resultlx)
             print(self.zcoordinats)
-            #test code 
-            # for row in range(numofy):
-            #     for column in range(numofx):
-            #         if (row%2)==0:
-            #             self.add_txt('working on the even row')
-            #             self.add_txt('moving to ' + 'x'+ str(column*deltax)+'\r\n')    
-            #             time.sleep(1)
-            #         if (row%2)!=0:
-            #             self.add_txt('working on the odd row')
-            #             self.add_txt('moving to ' + 'x'+'-'+str(column*deltax)+'\r\n')
-            #             time.sleep(1)
-
-            #         self.add_txt('let me do sth')
-            #         time.sleep(1)
-            #     if (row<numofy-1):
-            #         self.add_txt('next y .....')
-
-            #         time.sleep(1)
-            # print(coordinats)
-
             
         except serial.serialutil.PortNotOpenError:
             self.add_txt('port closed')   
