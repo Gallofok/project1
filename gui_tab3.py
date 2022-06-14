@@ -1,5 +1,3 @@
-#https://research.facebook.com/publications/control-strategies-for-physically-simulated-characters-performing-two-player-competitive-sports/
-
 from calendar import c
 import threading
 from tkinter import *
@@ -47,22 +45,31 @@ class tab3:
         self.portframe.grid(row=3,column=0)
 
         #measurepart
+        self.meatype = StringVar()
+        self.meatype.set('type1')
         self.xbegn = Entry(self.measureframe)
         self.xbegn.grid(row = 0,column=1)
+        self.L0 = Label(self.measureframe, text="choose measure type")
         self.L1 = Label(self.measureframe, text="xbeginn")
         self.L1.grid(row = 0,column=0)
         self.ybegn = Entry(self.measureframe)
         self.ybegn.grid(row = 1,column=1)
         self.L2 = Label(self.measureframe, text="ybeginn")
         self.L2.grid(row = 1,column=0)
+        self.meachoice1 = Radiobutton(self.measureframe,text = 'type1',value='type1',variable=self.meatype,command=self.showchoice)
+        self.meachoice2 = Radiobutton(self.measureframe,text = 'type2',value='type2',variable=self.meatype,command=self.showchoice)
 
 
-
-        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess).start(),width = 25)
+        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess1).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause',command = self.stoppro,width=25)
         self.emstart = Button(self.measureframe,text='start',command = self.start,width=25)
 
 
+
+
+        self.L0.grid(row = 0,column=2)
+        self.meachoice1.grid(row = 1,column=2)
+        self.meachoice2.grid(row = 2,column=2)
         self.measure.grid(row = 7,column=1)
         self.emstop.grid(row = 8,column=1)
         self.emstart.grid(row = 9,column=1)
@@ -197,37 +204,51 @@ class tab3:
         self.graph = Frame(self.frame)
 
         self.zgraph = Button(self.graph,command=self.zplot,text='zdiagramm')
-        self.zgraph.pack(side = BOTTOM)
+        self.zgraph.pack(side = TOP)
 
         self.dzgraph = Button(self.graph,command=self.dzplot,text='dzdiagram')
-        self.dzgraph.pack(side = BOTTOM)
+        self.dzgraph.pack(side = TOP)
+
+
+        self.dcls = Button(self.graph,command=self.clean,text='clean')
+        self.dcls.pack(side = TOP)
 
         self.graph.grid(row=4,column=1)
 
-
-        # self.resultlx = ['197.49173674011232', '198.06531217193603', '201.53500929260255']
-        # self.zcoordinats = ['22.90', '22.80', '22.50']
-        # self.xcoordinats = ['10.0', '15.0', '20.0']
-
-
-
+# ['44.8', '47.3', '49.8', '52.3', '54.8']
+# ['118.70212538146973', '177.71769465637206', '206.8756123352051', '191.39453305053712', '159.31534875488282']
+# ['12.90', '13.60', '14.20', '14.70', '15.10']
+        self.resultlx = []
+        self.zcoordinats = []
+        self.xcoordinats = []
+    def clean(self):
+        self.resultlx = []
+        self.xcoordinats = []
+        self.zcoordinats = []
+    def showchoice(self):
+        print (self.meatype.get())
     def dzplot(self): 
   
         window = Toplevel()
-        fig = Figure(figsize = (5, 5), 
+        window.title('dz value')
+        fig = Figure(figsize = (8,5), 
                     ) 
         x = [float(i) for i in self.xcoordinats]
         
-        z = [float(i) for i in self.resultlx] 
-    
+        resultflot = [float(i) for i in self.resultlx]
+        zfloat = [1000*float(i) for i in self.zcoordinats]
+        z = [i for i in zfloat]+[i for i in resultflot]
+
+        z = [i-z[0] for i in zfloat]
         
         plot1 = fig.add_subplot(111) 
-    
+
         
         plot1.plot(x,z,'.') 
     
-        
-        
+        plot1.set_xlabel('x position')
+        plot1.set_ylabel('delta z(ref to first pkt) in um')
+
         canvas = FigureCanvasTkAgg(fig, 
                                 master = window)   
         canvas.draw() 
@@ -244,19 +265,21 @@ class tab3:
     def zplot(self): 
   
         window = Toplevel()
-        fig = Figure(figsize = (5, 5), 
+        window.title('z value')
+        fig = Figure(figsize = (8,5 )
                     ) 
         x = [float(i) for i in self.xcoordinats]
         
         z = [float(i) for i in self.zcoordinats] 
-    
+
         
         plot1 = fig.add_subplot(111) 
-    
+        plot1.set_xlabel('x position')
+        plot1.set_ylabel('z position')
         
         plot1.plot(x,z,'.') 
     
-        
+
         
         canvas = FigureCanvasTkAgg(fig, 
                                 master = window)   
@@ -279,10 +302,11 @@ class tab3:
             self.ser.flushOutput()
             self.ser.write(str.encode('M114'+"\r\n"))
             cor = self.ser.readline().decode("UTF-8")
-            zpos = cor[19:24]
-            xpos = cor[2:6]
+            # zpos = cor[19:24]
+            zpos = cor[cor.find('Z')+2:cor.find('Z')+8]
+            xpos = cor[cor.find('X')+2:cor.find('X')+8]
             self.add_txt(zpos)
-            print(cor[:24])
+            print(cor)
             return cor[:24],zpos,xpos
         except AttributeError:
             self.add_txt('noting connected yet')
@@ -334,7 +358,9 @@ class tab3:
             return False
         return True
 
-    def measureprocess(self):    
+
+
+    def measureprocess1(self):    
         try:
             self.ser.flushInput()
             self.ser.flushOutput()            
@@ -347,14 +373,14 @@ class tab3:
                 self.ybegn.insert(0,'0')
 
             if self.xlen.get() == '':
-                self.xlen.insert(0,'5')
+                self.xlen.insert(0,'10')
             if self.ylen.get() == '':
                 self.ylen.insert(0,'10') 
 
             if self.xsample.get() == '':
                 self.xsample.insert(0,'2')
             if self.ysample.get() == '':
-                self.ysample.insert(0,'2')
+                self.ysample.insert(0,'1')
 
 
             if self.zdis.get() == '':
@@ -364,11 +390,12 @@ class tab3:
             
             numofy = int(self.ysample.get())
             numofx = int(self.xsample.get())
-
-            a = numofx-1
+            a = numofx
+            if(numofx%2!=0):a = numofx-1
             if (a == 0): a = 1
             
-            b = numofy-1
+            b = numofy
+            if(numofy%2!=0):b = numofy-1
             if (b == 0): b = 1
 
             deltax = lenx/a
@@ -414,12 +441,12 @@ class tab3:
                             self.resultlx.append(str(cod))
                             self.xcoordinats.append(currentx)
                             self.zcoordinats.append(currentz)
-                            goup = 1
+                            dissmaller = 2
 
-                            zpos = str(float(currentz)+goup)
+                            zpos = str(float(currentz)+dissmaller)
                              
                             self.add_txt('zpos now is   '+ zpos)
-                            steplimit = 2*goup/0.1
+                            steplimit = 2*dissmaller/0.1
                             self.add_txt('steplim now is ' + str(steplimit))
                             step = steplimit
 
@@ -466,7 +493,136 @@ class tab3:
             self.add_txt('port closed')   
         except AttributeError:
             self.add_txt('no machine connected')
-    
+
+    def measureprocess2(self):    
+        try:
+            self.ser.flushInput()
+            self.ser.flushOutput()            
+            _,zpos,xpos = self.abspos()
+            print('zpos is ' + zpos)
+        
+            if self.xbegn.get() == '':
+                self.xbegn.insert(0,'0')
+            if self.ybegn.get() == '':
+                self.ybegn.insert(0,'0')
+
+            if self.xlen.get() == '':
+                self.xlen.insert(0,'10')
+            if self.ylen.get() == '':
+                self.ylen.insert(0,'10') 
+
+            if self.xsample.get() == '':
+                self.xsample.insert(0,'2')
+            if self.ysample.get() == '':
+                self.ysample.insert(0,'1')
+
+
+            if self.zdis.get() == '':
+                self.zdis.insert(0,'15')
+            lenx = int(self.xlen.get())
+            leny = int(self.ylen.get())
+            
+            numofy = int(self.ysample.get())
+            numofx = int(self.xsample.get())
+            a = numofx
+            if(numofx%2!=0):a = numofx-1
+            if (a == 0): a = 1
+            
+            b = numofy
+            if(numofy%2!=0):b = numofy-1
+            if (b == 0): b = 1
+
+            deltax = lenx/a
+            deltay = leny/b
+            
+
+
+            dsafe = 6
+            steplimit = (int(self.zdis.get())-dsafe)/0.1
+
+            print(deltax,deltay)
+            deltax = str(deltax)
+            deltay = str(deltay)
+            self.ser.write(str.encode("G91\r\n"))
+            self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
+
+
+            print('step lim is   '+str(steplimit))
+            mov = '0.1'
+            for row in range(numofy):
+                for column in range(numofx):
+                    self.ser.write(str.encode("G91\r\n"))
+                    if (row%2)==0:
+                        self.add_txt('working on the even row')
+                        if (column != 0):
+                            self.ser.write(str.encode("G01"+'X'+deltax+'\r\n'))
+                    if (row%2)!=0:
+                        self.add_txt('working on the odd row')
+                        if (column != 0):
+                            self.ser.write(str.encode("G01"+'X'+'-'+deltax+'\r\n'))
+
+                    cod = 0
+                    step = 0
+                    
+                    while ( step < steplimit) :
+                        
+                        self.ser.write(str.encode("G01"+'Z'+mov+'\r\n'))
+        	            
+                        #self.ser.write(str.encode("M0 P500\r\n"))
+                        cod = self.getthedistance()
+                        self.add_txt(str(cod))
+                        #inversedir = 3*steplimit//4
+                        
+                        if (step == 15):
+                            if(mov == '0.1'):
+                                mov = '-0.1'
+                            else:
+                                mov = '0.1'
+                            print('inverse mov is' + mov)
+                            self.ser.write(str.encode("G90\r\n"))
+                            self.add_txt('back2Z ')    
+                            self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
+                            self.ser.write(str.encode("G91\r\n"))
+
+                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 80):
+                            self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
+                            co,currentz,currentx = self.abspos()
+                            self.resultlx.append(str(cod))
+                            self.xcoordinats.append(currentx)
+                            self.zcoordinats.append(currentz)
+                            disbigger = 4
+
+                            zpos = str(float(currentz))
+                                
+                            self.add_txt('zpos now is   '+ zpos)
+                            steplimit = 2*disbigger/0.1
+                            self.add_txt('steplim now is ' + str(steplimit))
+                            step = steplimit
+
+                        step=step+1
+
+
+                    self.ser.write(str.encode("G90\r\n"))
+                    self.add_txt('back2Z ')    
+                    self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
+
+
+                if (row<numofy-1):
+                    self.ser.write(str.encode("G91\r\n"))
+                    self.add_txt('next y .....')
+                    self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
+
+
+            print(self.xcoordinats)
+            print(self.resultlx)
+            print(self.zcoordinats)
+        
+        except serial.serialutil.PortNotOpenError:
+            self.add_txt('port closed')   
+        except AttributeError:
+                self.add_txt('no machine connected')
+
+
 
     def stoppro(self):
         if(self.ser != None):
