@@ -16,7 +16,7 @@ class tab3:
 
     def __init__(self, root, frame):
 
-
+        #the gui include has different sub frames.
         self.root = root
         self.frame = frame
         self.var = DoubleVar()
@@ -32,7 +32,7 @@ class tab3:
         self.xcoordinats = []
 
         # this is for the port
-        #there are 6 ports can be choosen 
+        #those codes create the port which can be choosen
         self.mylist = Listbox(self.portframe,width=67)
         for line in range(6):
             str1 = "COM" + str(line)
@@ -67,7 +67,7 @@ class tab3:
         self.meachoice2 = Radiobutton(self.measureframe,text = 'type2(low to high)',value='type2',variable=self.meatype,command=self.funchoice)
 
 
-        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.meafun).start(),width = 25)
+        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess2).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause',command = self.stoppro,width=25)
         self.emstart = Button(self.measureframe,text='start',command = self.start,width=25)
 
@@ -140,7 +140,7 @@ class tab3:
         #self.myLabel.grid(row=6, column=0)
         #self.e.grid(row=3, column=1)
 
-        
+        #ser is the serial port instance
         self.ser = None
         self.roundconframe = LabelFrame(self.frame)
         self.roundconframe.grid(row=1, column=0)
@@ -178,12 +178,15 @@ class tab3:
         self.control2.canvas.tag_bind(self.control2.trilist[5], '<Button-1>', self.zmovingplus2)
 
 
-        #this code is for the detector
+        # detector will connect the default ipv4 port with below codes
+        #MMD 0 will set the measurement mode to  chromatic confocal
+        #n_sample : desired length of autobuffer
         self.chr = chr_connection.CHR_connection('IP: 169.254.2.217',1)
         self.res = self.chr.send_command('$MMD 0')
-        self.n_sample = 1000
+        self.n_sample = 100
     
-        #it will show the real time information while measurement running
+        #it will show the real time information while measuring
+        # g code can also be sent here
 
         self.labe = Frame(self.frame)
         self.scrollbar = Scrollbar(self.labe)
@@ -196,14 +199,15 @@ class tab3:
         self.sender = Button(self.labe,command=self.sendcmd,text='sendcmd')
         self.sender.pack(side = BOTTOM)
 
-        self.reader = Button(self.labe,command=self.abspos,text='abspos')
+        self.reader = Button(self.labe,command=self.abspos,text=' abspos  ')
         self.reader.pack(side = BOTTOM)
 
         self.mytext.pack( side = TOP, fill = BOTH )
         self.scrollbar.config( command = self.mytext.yview )
-
         self.labe.grid(row=4,column=0)
 
+
+        #two output windows for the results
         self.graph = Frame(self.frame)
 
         self.zgraph = Button(self.graph,command=self.zplot,text='zdiagramm')
@@ -213,21 +217,23 @@ class tab3:
         self.dzgraph.pack(side = TOP)
 
 
-        self.dcls = Button(self.graph,command=self.clean,text='clean')
+        self.dcls = Button(self.graph,command=self.clean,text='     clean      ')
         self.dcls.pack(side = TOP)
         self.graph.grid(row=4,column=1)
 
 
-
+    #this function will clean the information of the output 
     def clean(self):
         self.resultlx = []
         self.xcoordinats = []
         self.zcoordinats = []
+    #this function can switch the measurement methods
     def funchoice(self):
         if(self.meatype.get() == 'type1'):self.meafun = self.measureprocess1
         if(self.meatype.get() == 'type2'):self.meafun = self.measureprocess2
         self.add_txt(self.meatype.get())
-
+    
+    #relative distance will be defined in this function and output in the chart
     def dzplot(self): 
 
         window = Toplevel()
@@ -262,7 +268,7 @@ class tab3:
                                     window) 
         toolbar.update()         
         canvas.get_tk_widget().pack() 
-
+    #absolt distance will be defined in this function and output in the chart
     def zplot(self): 
   
         window = Toplevel()
@@ -294,9 +300,10 @@ class tab3:
                                     window) 
         toolbar.update()         
         canvas.get_tk_widget().pack() 
-
+    #clean all the information on the label
     def cls(self):
         self.mytext.delete("1.0","end")
+    #it returns the coordinate value of the point
     def abspos(self):
         try:
             self.ser.flushInput()
@@ -304,15 +311,16 @@ class tab3:
             self.ser.write(str.encode('M114'+"\r\n"))
             cor = self.ser.readline().decode("UTF-8")
             # zpos = cor[19:24]
-            zpos = cor[cor.find('Z')+2:cor.find('Z')+8]
-            xpos = cor[cor.find('X')+2:cor.find('X')+8]
+            zpos = cor[cor.find('Z')+2:cor.find('E')]
+            xpos = cor[cor.find('X')+2:cor.find('Y')]
             self.add_txt(zpos)
             print(cor)
             return cor[:24],zpos,xpos
         except AttributeError:
             self.add_txt('noting connected yet')
+
+    #this code sent the last line of feedback        
     def sendcmd(self):
-        #this code sent the last line of feedback
         try:
             a = self.mytext.get("1.0", "end")
             idx = len(a.split('\n'))
@@ -322,7 +330,7 @@ class tab3:
         except AttributeError:
             self.add_txt('noting connected yet')
     
-
+    #add the information on the label
     def add_txt(self,cmd):
         if isinstance(cmd,str):
             self.mytext.insert(END,cmd+'\n')
@@ -334,7 +342,7 @@ class tab3:
         self.mytext.yview(END)
     
 
-
+    #request of the current light intensity
     def gettheintensiti(self):
             self.intensity = self.chr.send_command('$SODX 257')
             self.chr.set_autobuffer_size(self.n_sample)
@@ -343,6 +351,7 @@ class tab3:
             self.buffer = self.chr.read_autobuffer()
             self.intenmean = np.mean(self.buffer)
             return self.intenmean
+    #request of the current distance
     def getthedistance(self):
             self.distan = self.chr.send_command('$SODX 256')
             self.chr.set_autobuffer_size(self.n_sample)
@@ -351,7 +360,7 @@ class tab3:
             self.buffer2 = self.chr.read_autobuffer()
             self.dismean = np.mean(self.buffer2)
             return self.dismean   
-
+    #checking of the nan value
     def nan_equal(self,a,b):
         try: 
             np.testing.assert_equal(a,b)
@@ -360,14 +369,17 @@ class tab3:
         return True
 
 
-
+    #the type 1 measurement process.
     def measureprocess1(self):    
         try:
+            #clean the buffer before measurement
             self.ser.flushInput()
-            self.ser.flushOutput()            
+            self.ser.flushOutput()
+            #request of current position            
             _,zpos,xpos = self.abspos()
             print('zpos is ' + zpos)
-        
+
+            #default value of the measurement parameters
             if self.xbegn.get() == '':
                 self.xbegn.insert(0,'0')
             if self.ybegn.get() == '':
@@ -382,15 +394,14 @@ class tab3:
                 self.xsample.insert(0,'2')
             if self.ysample.get() == '':
                 self.ysample.insert(0,'1')
-
-
             if self.zdis.get() == '':
                 self.zdis.insert(0,'15')
+            #the integer will be used here   
             lenx = int(self.xlen.get())
             leny = int(self.ylen.get())
-            
             numofy = int(self.ysample.get())
             numofx = int(self.xsample.get())
+            #When the number of sampling points is odd, the sampling interval will be evenly divided into even parts
             a = numofx
             if(numofx%2!=0):a = numofx-1
             if (a == 0): a = 1
@@ -398,24 +409,24 @@ class tab3:
             b = numofy
             if(numofy%2!=0):b = numofy-1
             if (b == 0): b = 1
-
+            #step length of sampling 
             deltax = lenx/a
             deltay = leny/b
             
-
-
+            #initial defined safety heigth
             dsafe = 6
             steplimit = (int(self.zdis.get())-dsafe)/0.1
-
+            #the integer or float muss be convert to string before send to the machine
             print(deltax,deltay)
             deltax = str(deltax)
             deltay = str(deltay)
+
+            #xbegn and ybegn will set the movement wrt current position
             self.ser.write(str.encode("G91\r\n"))
             self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
 
 
             print('step lim is     '+str(steplimit))
-    
             for row in range(numofy):
                 for column in range(numofx):
                     self.ser.write(str.encode("G91\r\n"))
@@ -427,16 +438,16 @@ class tab3:
                         self.add_txt('working on the odd row')
                         if (column != 0):
                             self.ser.write(str.encode("G01"+'X'+'-'+deltax+'\r\n'))
-
+                    #cod is the current measured distance ,if the distance out of measurement rang,nan could be occured
+                    #step record the moving step in z direction
                     cod = 0
                     step = 0
                     while ( step < steplimit) :
                         self.ser.write(str.encode("G01"+'Z'+'-0.1''\r\n'))
-                        #self.ser.write(str.encode("M0 P500\r\n"))
                         cod = self.getthedistance()
                         self.add_txt(str(cod))
-                        
-                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 80):
+                        #once the cod reach the the range 60-260.it will be recorded as result
+                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 160):
                             self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
                             co,currentz,currentx = self.abspos()
                             self.resultlx.append(str(cod))
@@ -461,11 +472,10 @@ class tab3:
 
 
                 if (row<numofy-1):
+                    #once the measurement in one row done ,it will move to the next row
                     self.ser.write(str.encode("G91\r\n"))
                     self.add_txt('next y .....')
                     self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
-
-
             print(self.xcoordinats)
             print(self.resultlx)
             print(self.zcoordinats)
@@ -516,8 +526,6 @@ class tab3:
             deltax = lenx/a
             deltay = leny/b
             
-
-
             dsafe = 6
             steplimit = (int(self.zdis.get())-dsafe)/0.1
 
@@ -526,9 +534,11 @@ class tab3:
             deltay = str(deltay)
             self.ser.write(str.encode("G91\r\n"))
             self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
-
-
             print('step lim is   '+str(steplimit))
+
+            #the mov is used to set the movement in z direction.
+    
+
             mov = '0.1'
             for row in range(numofy):
                 for column in range(numofx):
@@ -549,23 +559,24 @@ class tab3:
                         
                         self.ser.write(str.encode("G01"+'Z'+mov+'\r\n'))
         	            
-                        #self.ser.write(str.encode("M0 P500\r\n"))
+
                         cod = self.getthedistance()
                         self.add_txt(str(cod))
-                        #inversedir = 3*steplimit//4
-                        
+
+                        #once the movement setp in one direciton +z or -z reach 15
+                        #the movement will be inversed.
                         if (step == 15):
                             if(mov == '0.1'):
                                 mov = '-0.1'
                             else:
                                 mov = '0.1'
                             print('inverse mov is' + mov)
-                            self.ser.write(str.encode("G90\r\n"))
-                            self.add_txt('back2Z ')    
-                            self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
-                            self.ser.write(str.encode("G91\r\n"))
+                            # self.ser.write(str.encode("G90\r\n"))
+                            # self.add_txt('back2Z ')    
+                            # self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
+                            # self.ser.write(str.encode("G91\r\n"))
 
-                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 80):
+                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 100):
                             self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
                             co,currentz,currentx = self.abspos()
                             self.resultlx.append(str(cod))
@@ -583,9 +594,9 @@ class tab3:
                         step=step+1
 
 
-                    self.ser.write(str.encode("G90\r\n"))
-                    self.add_txt('back2Z ')    
-                    self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
+                    # self.ser.write(str.encode("G90\r\n"))
+                    # self.add_txt('back2Z ')    
+                    # self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
 
 
                 if (row<numofy-1):
@@ -603,7 +614,9 @@ class tab3:
         except AttributeError:
                 self.add_txt('no machine connected')
 
+    
 
+    #
 
     def stoppro(self):
         if(self.ser != None):
