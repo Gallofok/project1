@@ -68,7 +68,7 @@ class tab3:
         self.meachoice2 = Radiobutton(self.measureframe,text = 'type2(low to high)',value='type2',variable=self.meatype,command=self.funchoice)
 
 
-        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess1).start(),width = 25)
+        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.meafun).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause result export',command = self.exportdata,width=25)
         self.emstart = Button(self.measureframe,text='start result import',command = self.imoprtdata,width=25)
 
@@ -450,7 +450,7 @@ class tab3:
                         cod = self.getthedistance()
                         self.add_txt(str(cod))
                         #once the cod reach the the range 60-260.it will be recorded as result
-                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 160):
+                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 100):
                             self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
                             co,currentz,currentx = self.abspos()
                             self.resultlx.append(str(cod))
