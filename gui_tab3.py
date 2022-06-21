@@ -619,8 +619,7 @@ class tab3:
 
     
 
-    #
-
+    #pause the machine if necessary
     def stoppro(self):
         if(self.ser != None):
 
@@ -629,6 +628,9 @@ class tab3:
         else:
 
             self.add_txt('no port connected now')
+
+
+    # start the machine after pause
     def start(self):
         if(self.ser != None):
 
@@ -637,7 +639,7 @@ class tab3:
         else:
 
             self.add_txt('no port connected now')
-
+    #connect the 3d drucker
     def connect3d(self):
         try:
             self.ser = serial.Serial(self.mylist.selection_get().strip(), 115200,)
@@ -649,13 +651,15 @@ class tab3:
         except tkinter.TclError:
 
             self.add_txt('one port muss be selected first')
-
+    #go to origianl position.in order to let the machine move ,it is necessary to do it first.
     def Homexyz(self):
         try:
             self.ser.write(str.encode("G28\r\n"))
             self.add_txt('homing')
         except AttributeError:
             self.add_txt('no machine connected')
+
+    #disconnect the machine but it oft used to pause the process if necessary
     def disconnect3d(self):
         
         try:
@@ -668,7 +672,10 @@ class tab3:
 
                 self.add_txt('no port connected now')
         except AttributeError:
-            self.add_txt('no machine connected')   
+            self.add_txt('no machine connected')
+
+    #this basic moving function is used to defined the sub moving function on the gui
+    # because the command in button can not input the arguement   
     def moving(self,direction,scale):
         
         try:
@@ -771,7 +778,7 @@ class tab3:
         self.moving(direction=dir,scale=sc)
 
 
-
+    #export the measurement result
     def exportdata(self):
         category = ['Pointindex', 'X', 'Z', 'Readvalue'] 
         ptidx =  []
@@ -786,7 +793,7 @@ class tab3:
             write.writerows(rows) 
         f.close()
 
-
+    #importing the result from external file
     def imoprtdata(self):
         file = open('result.csv')
         csvreader = csv.reader(file)
