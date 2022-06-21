@@ -10,6 +10,7 @@ import chr_dll2_connection as chr_connection
 from matplotlib.figure import Figure 
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,  
 NavigationToolbar2Tk)
+import csv
 
 
 class tab3:
@@ -67,8 +68,8 @@ class tab3:
         self.meachoice2 = Radiobutton(self.measureframe,text = 'type2(low to high)',value='type2',variable=self.meatype,command=self.funchoice)
 
 
-        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess2).start(),width = 25)
-        self.emstop = Button(self.measureframe,text='pause',command = self.stoppro,width=25)
+        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess1).start(),width = 25)
+        self.emstop = Button(self.measureframe,text='pause result export',command = self.exportdata,width=25)
         self.emstart = Button(self.measureframe,text='start',command = self.start,width=25)
 
 
@@ -244,9 +245,11 @@ class tab3:
         
         resultflot = [float(i) for i in self.resultlx]
         zfloat = [1000*float(i) for i in self.zcoordinats]
-        z = [i for i in zfloat]+[i for i in resultflot]
+        # z = [i for i in zfloat]+[i for i in resultflot]
 
-        z = [i-z[0] for i in zfloat]
+        # z = [i-z[0] for i in zfloat]
+
+        z = resultflot 
         
         plot1 = fig.add_subplot(111) 
 
@@ -453,7 +456,7 @@ class tab3:
                             self.resultlx.append(str(cod))
                             self.xcoordinats.append(currentx)
                             self.zcoordinats.append(currentz)
-                            dissmaller = 2
+                            dissmaller = 1
 
                             zpos = str(float(currentz)+dissmaller)
                              
@@ -769,10 +772,20 @@ class tab3:
 
 
 
+    def exportdata(self):
+        category = ['Pointindex', 'X', 'Z', 'Readvalue'] 
+        ptidx =  []
+        rows =  []
+        for i in range(len(self.xcoordinats)):
+            ptidx.append(i)
+        for i in range(len(self.xcoordinats)):
+            rows.append([ptidx[i],self.xcoordinats[i], self.zcoordinats[i],self.resultlx[i]]) 
+        with open('result.csv', 'w') as f: 
+            write = csv.writer(f) 
+            write.writerow(category) 
+            write.writerows(rows) 
 
-
-
-
+        f.close()
 if __name__ == "__main__":
     root = Tk()
     frame = Frame(root)
