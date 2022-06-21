@@ -70,7 +70,7 @@ class tab3:
 
         self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess1).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause result export',command = self.exportdata,width=25)
-        self.emstart = Button(self.measureframe,text='start',command = self.start,width=25)
+        self.emstart = Button(self.measureframe,text='start result import',command = self.imoprtdata,width=25)
 
 
 
@@ -784,8 +784,24 @@ class tab3:
             write = csv.writer(f) 
             write.writerow(category) 
             write.writerows(rows) 
-
         f.close()
+
+
+    def imoprtdata(self):
+        file = open('result.csv')
+        csvreader = csv.reader(file)
+        header = []
+        header = next(csvreader)
+        rows = []
+        for row in csvreader:
+            if (len(row)!=0):
+                rows.append(row)
+        for i in range(len(rows)):
+            self.xcoordinats.append(rows[i][1])
+            self.zcoordinats.append(rows[i][2])
+            self.resultlx.append(rows[i][3])
+        self.add_txt('data imported! ')
+
 if __name__ == "__main__":
     root = Tk()
     frame = Frame(root)
