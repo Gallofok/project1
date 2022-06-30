@@ -1,3 +1,4 @@
+from audioop import findmax
 from calendar import c
 import threading
 from tkinter import *
@@ -11,6 +12,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,  
 NavigationToolbar2Tk)
 import csv
+from mpl_toolkits.mplot3d import Axes3D
+
 
 
 class tab3:
@@ -68,7 +71,7 @@ class tab3:
         self.meachoice2 = Radiobutton(self.measureframe,text = 'type2(low to high)',value='type2',variable=self.meatype,command=self.funchoice)
 
 
-        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.meafun).start(),width = 25)
+        self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess1).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause result export',command = self.exportdata,width=25)
         self.emstart = Button(self.measureframe,text='start result import',command = self.imoprtdata,width=25)
 
@@ -109,7 +112,6 @@ class tab3:
         self.L7.grid(row = 6,column=0)
         self.zdis = Entry(self.measureframe)
         self.zdis.grid(row=6,column=1)
-        
 
 
         # add some buttons
@@ -228,6 +230,7 @@ class tab3:
         self.resultlx = []
         self.xcoordinats = []
         self.zcoordinats = []
+        self.ycoordinate = []
     #this function can switch the measurement methods
     def funchoice(self):
         if(self.meatype.get() == 'type1'):self.meafun = self.measureprocess1
@@ -257,7 +260,7 @@ class tab3:
         plot1.plot(x,z,'.') 
     
         plot1.set_xlabel('x position')
-        plot1.set_ylabel('delta z(ref to first pkt) in um')
+        plot1.set_ylabel('read result (um)')
 
         canvas = FigureCanvasTkAgg(fig, 
                                 master = window)   
@@ -281,16 +284,15 @@ class tab3:
         x = [float(i) for i in self.xcoordinats]
         
         z = [float(i) for i in self.zcoordinats] 
-
+        
+        y = [float(i) for i in self.ycoordinats] 
         
         plot1 = fig.add_subplot(111) 
         plot1.set_xlabel('x position')
-        plot1.set_ylabel('z position')
+        plot1.set_ylabel('z position(mm)')
         
         plot1.plot(x,z,'.') 
     
-
-        
         canvas = FigureCanvasTkAgg(fig, 
                                 master = window)   
         canvas.draw() 
@@ -298,7 +300,6 @@ class tab3:
         
         canvas.get_tk_widget().pack() 
     
-        
         toolbar = NavigationToolbar2Tk(canvas, 
                                     window) 
         toolbar.update()         
@@ -313,12 +314,12 @@ class tab3:
             self.ser.flushOutput()
             self.ser.write(str.encode('M114'+"\r\n"))
             cor = self.ser.readline().decode("UTF-8")
-            # zpos = cor[19:24]
             zpos = cor[cor.find('Z')+2:cor.find('E')]
             xpos = cor[cor.find('X')+2:cor.find('Y')]
+            ypos = cor[cor.find('Y')+2:cor.find('Z')]
             self.add_txt(zpos)
             print(cor)
-            return cor[:24],zpos,xpos
+            return cor[:24],zpos,xpos,ypos
         except AttributeError:
             self.add_txt('noting connected yet')
 
@@ -371,6 +372,13 @@ class tab3:
             return False
         return True
 
+    # find the max value in a list
+    def findmax(self,inputlist):
+        inputlist = [float(i) for i in inputlist]
+        maxvalue = max(inputlist)
+        maxindex = inputlist.index(maxvalue)
+        print(maxvalue,maxindex)
+        return maxvalue,maxindex
 
     #the type 1 measurement process.
     def measureprocess1(self):    
@@ -379,7 +387,7 @@ class tab3:
             self.ser.flushInput()
             self.ser.flushOutput()
             #request of current position            
-            _,zpos,xpos = self.abspos()
+            _,zpos,xpos,ypos = self.abspos()
             print('zpos is ' + zpos)
 
             #default value of the measurement parameters
@@ -427,8 +435,6 @@ class tab3:
             #xbegn and ybegn will set the movement wrt current position
             self.ser.write(str.encode("G91\r\n"))
             self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
-
-
             print('step lim is     '+str(steplimit))
             for row in range(numofy):
                 for column in range(numofx):
@@ -452,10 +458,11 @@ class tab3:
                         #once the cod reach the the range 60-260.it will be recorded as result
                         if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 100):
                             self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
-                            co,currentz,currentx = self.abspos()
+                            co,currentz,currentx,currenty = self.abspos()
                             self.resultlx.append(str(cod))
                             self.xcoordinats.append(currentx)
                             self.zcoordinats.append(currentz)
+                            self.ycoordinats.append(currenty)
                             dissmaller = 1
 
                             zpos = str(float(currentz)+dissmaller)
@@ -477,11 +484,12 @@ class tab3:
                 if (row<numofy-1):
                     #once the measurement in one row done ,it will move to the next row
                     self.ser.write(str.encode("G91\r\n"))
-                    self.add_txt('next y .....')
+                    self.add_txt('next y ........')
                     self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
             print(self.xcoordinats)
             print(self.resultlx)
             print(self.zcoordinats)
+            print(self.ycoordinats)
             
         except serial.serialutil.PortNotOpenError:
             self.add_txt('port closed')   
@@ -492,7 +500,7 @@ class tab3:
         try:
             self.ser.flushInput()
             self.ser.flushOutput()            
-            _,zpos,xpos = self.abspos()
+            _,zpos,xpos,ypos = self.abspos()
             print('zpos is ' + zpos)
         
             if self.xbegn.get() == '':
@@ -573,7 +581,7 @@ class tab3:
                                 mov = '-0.1'
                             else:
                                 mov = '0.1'
-                            print('inverse mov is' + mov)
+                            print('inversed mov is' + mov)
                             # self.ser.write(str.encode("G90\r\n"))
                             # self.add_txt('back2Z ')    
                             # self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
@@ -581,10 +589,11 @@ class tab3:
 
                         if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 100):
                             self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
-                            co,currentz,currentx = self.abspos()
+                            co,currentz,currentx,currenty = self.abspos()
                             self.resultlx.append(str(cod))
                             self.xcoordinats.append(currentx)
                             self.zcoordinats.append(currentz)
+                            self.ycoordinats.append(currenty)
                             disbigger = 4
 
                             zpos = str(float(currentz))
@@ -807,8 +816,10 @@ class tab3:
             self.xcoordinats.append(rows[i][1])
             self.zcoordinats.append(rows[i][2])
             self.resultlx.append(rows[i][3])
-        self.add_txt('data imported! ')
 
+        self.findmax(self.zcoordinats)
+        self.add_txt('data imported! ')
+#main process if only this script works
 if __name__ == "__main__":
     root = Tk()
     frame = Frame(root)
