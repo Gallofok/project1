@@ -3,6 +3,8 @@ from calendar import c
 import threading
 from tkinter import *
 import tkinter.filedialog
+
+from matplotlib import projections
 import round_controller
 import reccontrol
 import serial
@@ -12,7 +14,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,  
 NavigationToolbar2Tk)
 import csv
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits import mplot3d
+import matplotlib.pyplot as plt
 
 
 
@@ -34,6 +37,7 @@ class tab3:
         self.resultlx = []
         self.zcoordinats = []
         self.xcoordinats = []
+        self.ycoordinats = []
 
         # this is for the port
         #those codes create the port which can be choosen
@@ -251,13 +255,17 @@ class tab3:
         # z = [i for i in zfloat]+[i for i in resultflot]
 
         # z = [i-z[0] for i in zfloat]
+        for i in range(len(self.xcoordinats)):
+            self.ycoordinats.append(1)
+
+        y = [float(i) for i in self.ycoordinats] 
 
         z = resultflot 
         
-        plot1 = fig.add_subplot(111) 
+        plot1 = fig.add_subplot(111,projection='3d') 
 
         
-        plot1.plot(x,z,'.') 
+        plot1.scatter3D(x, y, z)
     
         plot1.set_xlabel('x position')
         plot1.set_ylabel('read result (um)')
@@ -279,19 +287,21 @@ class tab3:
   
         window = Toplevel()
         window.title('z value')
-        fig = Figure(figsize = (8,5 )
-                    ) 
+        fig = Figure(figsize = (8,5 )) 
+
+        for i in range(len(self.xcoordinats)):
+            self.ycoordinats.append(1)
+                    
         x = [float(i) for i in self.xcoordinats]
         
         z = [float(i) for i in self.zcoordinats] 
         
         y = [float(i) for i in self.ycoordinats] 
         
-        plot1 = fig.add_subplot(111) 
-        plot1.set_xlabel('x position')
-        plot1.set_ylabel('z position(mm)')
-        
-        plot1.plot(x,z,'.') 
+
+        plot1 = fig.add_subplot(111, projection="3d")
+
+        plot1.scatter3D(x, y, z)
     
         canvas = FigureCanvasTkAgg(fig, 
                                 master = window)   
