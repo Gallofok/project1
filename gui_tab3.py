@@ -4,7 +4,6 @@ import threading
 from tkinter import *
 import tkinter.filedialog
 
-from matplotlib import projections
 import round_controller
 import reccontrol
 import serial
@@ -38,6 +37,7 @@ class tab3:
         self.zcoordinats = []
         self.xcoordinats = []
         self.ycoordinats = []
+
 
         # this is for the port
         #those codes create the port which can be choosen
@@ -246,19 +246,18 @@ class tab3:
 
         window = Toplevel()
         window.title('dz value')
-        fig = Figure(figsize = (8,5), 
-                    ) 
+        fig = Figure(figsize = (8,5) ) 
         x = [float(i) for i in self.xcoordinats]
         
-        resultflot = [float(i) for i in self.resultlx]
         zfloat = [1000*float(i) for i in self.zcoordinats]
         # z = [i for i in zfloat]+[i for i in resultflot]
 
         # z = [i-z[0] for i in zfloat]
-        for i in range(len(self.xcoordinats)):
-            self.ycoordinats.append(1)
 
-        y = [float(i) for i in self.ycoordinats] 
+
+        y = [float(i) for i in self.ycoordinats]
+
+        resultflot = [float(i) for i in self.resultlx]
 
         z = resultflot 
         
@@ -267,8 +266,6 @@ class tab3:
         
         plot1.scatter3D(x, y, z)
     
-        plot1.set_xlabel('x position')
-        plot1.set_ylabel('read result (um)')
 
         canvas = FigureCanvasTkAgg(fig, 
                                 master = window)   
@@ -289,16 +286,14 @@ class tab3:
         window.title('z value')
         fig = Figure(figsize = (8,5 )) 
 
-        for i in range(len(self.xcoordinats)):
-            self.ycoordinats.append(1)
                     
         x = [float(i) for i in self.xcoordinats]
         
-        z = [float(i) for i in self.zcoordinats] 
+        
         
         y = [float(i) for i in self.ycoordinats] 
         
-
+        z = [float(i) for i in self.zcoordinats] 
         plot1 = fig.add_subplot(111, projection="3d")
 
         plot1.scatter3D(x, y, z)
@@ -826,6 +821,9 @@ class tab3:
             self.xcoordinats.append(rows[i][1])
             self.zcoordinats.append(rows[i][2])
             self.resultlx.append(rows[i][3])
+        if self.ycoordinats == [] :
+            for i in range(len(self.xcoordinats)):
+                self.ycoordinats.append(1)
 
         self.findmax(self.zcoordinats)
         self.add_txt('data imported! ')
