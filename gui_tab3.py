@@ -34,10 +34,9 @@ class tab3:
         #self.myLabel = Label(self.frame, text=' ')
         #self.e = Entry(self.buttonframe, width=20, font=('Helvetica', 25))         
         self.resultlx = []
-        self.zcoordinats = []
         self.xcoordinats = []
         self.ycoordinats = []
-
+        self.zcoordinats = []
 
         # this is for the port
         #those codes create the port which can be choosen
@@ -80,7 +79,7 @@ class tab3:
         self.alongradiu = Button(self.measureframe,text='alongradiusmeasure',command=lambda:threading.Thread(target=self.radiusmea).start(),width=25)
         self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess1).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause result export',command = self.exportdata,width=25)
-        self.emstart = Button(self.measureframe,text='start result import',command = self.imoprtdata,width=25)
+        self.emstart = Button(self.measureframe,text='start result import',command = self.importdata,width=25)
         
 
 
@@ -235,10 +234,10 @@ class tab3:
 
     #this function will clean the information of the output 
     def clean(self):
-        self.resultlx = []
-        self.xcoordinats = []
-        self.zcoordinats = []
-        self.ycoordinate = []
+        self.resultlx.clear()
+        self.xcoordinats.clear()
+        self.ycoordinats.clear()
+        self.zcoordinats.clear()
     #this function can switch the measurement methods
     def funchoice(self):
         if(self.meatype.get() == 'type1'):self.meafun = self.measureprocess1
@@ -251,22 +250,21 @@ class tab3:
         window = Toplevel()
         window.title('dz value')
         fig = Figure(figsize = (8,5) ) 
-        x = [float(i) for i in self.xcoordinats]
+        
         
         # z = [i for i in zfloat]+[i for i in resultflot]
 
         # z = [i-z[0] for i in zfloat]
 
 
+        x = [float(i) for i in self.xcoordinats]
         y = [float(i) for i in self.ycoordinats]
-
         resultflot = [float(i) for i in self.resultlx]
 
         z = resultflot 
         
         plot1 = fig.add_subplot(111,projection='3d') 
 
-        
         plot1.scatter3D(x, y, z)
     
 
@@ -291,8 +289,6 @@ class tab3:
 
                     
         x = [float(i) for i in self.xcoordinats]
-        
-        
         
         y = [float(i) for i in self.ycoordinats] 
         
@@ -835,7 +831,7 @@ class tab3:
         f.close()
 
     #importing the result from external file
-    def imoprtdata(self):
+    def importdata(self):
         file = open('result.csv')
         csvreader = csv.reader(file)
         header = []
