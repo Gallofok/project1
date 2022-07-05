@@ -64,58 +64,62 @@ class tab3:
         self.meafun = self.measureprocess1
         self.xbegn = Entry(self.measureframe)
         self.xbegn.grid(row = 0,column=1)
-        self.L0 = Label(self.measureframe, text="choose measure type")
         self.L1 = Label(self.measureframe, text="xbeginn")
         self.L1.grid(row = 0,column=0)
         self.ybegn = Entry(self.measureframe)
         self.ybegn.grid(row = 1,column=1)
         self.L2 = Label(self.measureframe, text="ybeginn")
         self.L2.grid(row = 1,column=0)
-        self.meachoice1 = Radiobutton(self.measureframe,text = 'type1(high to low)',value='type1',variable=self.meatype,command=self.funchoice)
-        self.meachoice2 = Radiobutton(self.measureframe,text = 'type2(low to high)',value='type2',variable=self.meatype,command=self.funchoice)
+        self.zbegn = Entry(self.measureframe)
+        self.zbegn.grid(row = 2,column=1)
+        self.L3 = Label(self.measureframe, text="zbeginn")
+        self.L3.grid(row = 2,column=0)
+        # self.meachoice1 = Radiobutton(self.measureframe,text = 'type1(high to low)',value='type1',variable=self.meatype,command=self.funchoice)
+        # self.meachoice2 = Radiobutton(self.measureframe,text = 'type2(low to high)',value='type2',variable=self.meatype,command=self.funchoice)
 
-
+        self.alongradiu = Button(self.measureframe,text='alongradiusmeasure',command = self.radiusmea,width=25)
         self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess1).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause result export',command = self.exportdata,width=25)
         self.emstart = Button(self.measureframe,text='start result import',command = self.imoprtdata,width=25)
+        
 
 
 
 
-        self.L0.grid(row = 0,column=2)
-        self.meachoice1.grid(row = 1,column=2)
-        self.meachoice2.grid(row = 2,column=2)
-        self.measure.grid(row = 7,column=1)
-        self.emstop.grid(row = 8,column=1)
-        self.emstart.grid(row = 9,column=1)
+  
+        # self.meachoice1.grid(row = 1,column=2)
+        # self.meachoice2.grid(row = 2,column=2)
+        self.measure.grid(row = 8,column=1)
+        self.emstop.grid(row = 9,column=1)
+        self.emstart.grid(row = 10,column=1)
         self.measureframe.grid(row = 3,column=1)
-
+        self.alongradiu.grid(row = 11,column=1)
 
 
         self.xlen = Entry(self.measureframe)
         self.ylen = Entry(self.measureframe)
-        self.xlen.grid(row = 2,column=1)
-        self.ylen.grid(row = 3,column=1)
+        self.xlen.grid(row = 3,column=1)
+        self.ylen.grid(row = 4,column=1)
         self.L3 = Label(self.measureframe, text="xlen")
-        self.L3.grid(row = 2,column=0)
+        self.L3.grid(row = 3,column=0)
         self.L4 = Label(self.measureframe, text="ylen")
-        self.L4.grid(row = 3,column=0)
+        self.L4.grid(row = 4,column=0)
 
         self.L5 = Label(self.measureframe, text="xsamplepkt")
-        self.L5.grid(row = 4,column=0)
+        self.L5.grid(row = 5,column=0)
         self.L6 = Label(self.measureframe, text="ysamplepkt")
-        self.L6.grid(row = 5,column=0)
+        self.L6.grid(row = 6,column=0)
 
         self.xsample = Entry(self.measureframe)
         self.ysample = Entry(self.measureframe)
-        self.xsample.grid(row = 4,column=1)
-        self.ysample.grid(row = 5,column=1)
+        self.xsample.grid(row = 5,column=1)
+        self.ysample.grid(row = 6,column=1)
 
 
         self.L7 = Label(self.measureframe, text="z dis approx")
-        self.L7.grid(row = 6,column=0)
+        self.L7.grid(row = 7,column=0)
         self.zdis = Entry(self.measureframe)
-        self.zdis.grid(row=6,column=1)
+        self.zdis.grid(row=7,column=1)
 
 
         # add some buttons
@@ -249,7 +253,6 @@ class tab3:
         fig = Figure(figsize = (8,5) ) 
         x = [float(i) for i in self.xcoordinats]
         
-        zfloat = [1000*float(i) for i in self.zcoordinats]
         # z = [i for i in zfloat]+[i for i in resultflot]
 
         # z = [i-z[0] for i in zfloat]
@@ -383,7 +386,7 @@ class tab3:
         maxvalue = max(inputlist)
         maxindex = inputlist.index(maxvalue)
         print(maxvalue,maxindex)
-        return maxvalue,maxindex
+        return maxindex
 
     #the type 1 measurement process.
     def measureprocess1(self):    
@@ -400,16 +403,16 @@ class tab3:
                 self.xbegn.insert(0,'0')
             if self.ybegn.get() == '':
                 self.ybegn.insert(0,'0')
-
+            if self.zbegn.get() == '':
+                self.zbegn.insert(0,'0')
             if self.xlen.get() == '':
                 self.xlen.insert(0,'10')
             if self.ylen.get() == '':
-                self.ylen.insert(0,'10') 
-
+                self.ylen.insert(0,'20') 
             if self.xsample.get() == '':
-                self.xsample.insert(0,'2')
+                self.xsample.insert(0,'1')
             if self.ysample.get() == '':
-                self.ysample.insert(0,'1')
+                self.ysample.insert(0,'5')
             if self.zdis.get() == '':
                 self.zdis.insert(0,'15')
             #the integer will be used here   
@@ -439,7 +442,7 @@ class tab3:
 
             #xbegn and ybegn will set the movement wrt current position
             self.ser.write(str.encode("G91\r\n"))
-            self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
+            self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'Z'+self.zbegn.get()+'\r\n'))
             print('step lim is     '+str(steplimit))
             for row in range(numofy):
                 for column in range(numofx):
@@ -492,144 +495,160 @@ class tab3:
                     self.add_txt('next y ........')
                     self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
             print(self.xcoordinats)
-            print(self.resultlx)
-            print(self.zcoordinats)
             print(self.ycoordinats)
-            
+            print(self.zcoordinats)   
+            print(self.resultlx)
+            print(self.findmax(self.zcoordinats))
         except serial.serialutil.PortNotOpenError:
             self.add_txt('port closed')   
         except AttributeError:
             self.add_txt('no machine connected')
 
-    def measureprocess2(self):    
-        try:
-            self.ser.flushInput()
-            self.ser.flushOutput()            
-            _,zpos,xpos,ypos = self.abspos()
-            print('zpos is ' + zpos)
+
+    def radiusmea(self):
+        radidx = self.findmax(self.zcoordinats)
+        print('go to position ..'+ self.xcoordinats[radidx],self.ycoordinats[radidx],self.zcoordinats[radidx])
+
+        self.xbegn.insert(0,str(self.xcoordinats[radidx]))
+        self.ybegn.insert(0,str(self.ycoordinats[radidx]))
+        self.zbegn.insert(0,str(self.zcoordinats[radidx]))
+        self.xlen.insert(0,'10')
+        self.ylen.insert(0,'20') 
+        self.xsample.insert(0,'5')
+        self.ysample.insert(0,'1')
+        self.measureprocess1()
+        return
+
+
+    # def measureprocess2(self):    
+    #     try:
+    #         self.ser.flushInput()
+    #         self.ser.flushOutput()            
+    #         _,zpos,xpos,ypos = self.abspos()
+    #         print('zpos is ' + zpos)
         
-            if self.xbegn.get() == '':
-                self.xbegn.insert(0,'0')
-            if self.ybegn.get() == '':
-                self.ybegn.insert(0,'0')
+    #         if self.xbegn.get() == '':
+    #             self.xbegn.insert(0,'0')
+    #         if self.ybegn.get() == '':
+    #             self.ybegn.insert(0,'0')
 
-            if self.xlen.get() == '':
-                self.xlen.insert(0,'10')
-            if self.ylen.get() == '':
-                self.ylen.insert(0,'10') 
+    #         if self.xlen.get() == '':
+    #             self.xlen.insert(0,'10')
+    #         if self.ylen.get() == '':
+    #             self.ylen.insert(0,'10') 
 
-            if self.xsample.get() == '':
-                self.xsample.insert(0,'2')
-            if self.ysample.get() == '':
-                self.ysample.insert(0,'1')
+    #         if self.xsample.get() == '':
+    #             self.xsample.insert(0,'2')
+    #         if self.ysample.get() == '':
+    #             self.ysample.insert(0,'1')
 
 
-            if self.zdis.get() == '':
-                self.zdis.insert(0,'15')
-            lenx = int(self.xlen.get())
-            leny = int(self.ylen.get())
+    #         if self.zdis.get() == '':
+    #             self.zdis.insert(0,'15')
+    #         lenx = int(self.xlen.get())
+    #         leny = int(self.ylen.get())
             
-            numofy = int(self.ysample.get())
-            numofx = int(self.xsample.get())
-            a = numofx
-            if(numofx%2!=0):a = numofx-1
-            if (a == 0): a = 1
+    #         numofy = int(self.ysample.get())
+    #         numofx = int(self.xsample.get())
+    #         a = numofx
+    #         if(numofx%2!=0):a = numofx-1
+    #         if (a == 0): a = 1
             
-            b = numofy
-            if(numofy%2!=0):b = numofy-1
-            if (b == 0): b = 1
+    #         b = numofy
+    #         if(numofy%2!=0):b = numofy-1
+    #         if (b == 0): b = 1
 
-            deltax = lenx/a
-            deltay = leny/b
+    #         deltax = lenx/a
+    #         deltay = leny/b
             
-            dsafe = 6
-            steplimit = (int(self.zdis.get())-dsafe)/0.1
+    #         dsafe = 6
+    #         steplimit = (int(self.zdis.get())-dsafe)/0.1
 
-            print(deltax,deltay)
-            deltax = str(deltax)
-            deltay = str(deltay)
-            self.ser.write(str.encode("G91\r\n"))
-            self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
-            print('step lim is   '+str(steplimit))
+    #         print(deltax,deltay)
+    #         deltax = str(deltax)
+    #         deltay = str(deltay)
+    #         self.ser.write(str.encode("G91\r\n"))
+    #         self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'\r\n'))
+    #         print('step lim is   '+str(steplimit))
 
-            #the mov is used to set the movement in z direction.
+    #         #the mov is used to set the movement in z direction.
     
 
-            mov = '0.1'
-            for row in range(numofy):
-                for column in range(numofx):
-                    self.ser.write(str.encode("G91\r\n"))
-                    if (row%2)==0:
-                        self.add_txt('working on the even row')
-                        if (column != 0):
-                            self.ser.write(str.encode("G01"+'X'+deltax+'\r\n'))
-                    if (row%2)!=0:
-                        self.add_txt('working on the odd row')
-                        if (column != 0):
-                            self.ser.write(str.encode("G01"+'X'+'-'+deltax+'\r\n'))
+    #         mov = '0.1'
+    #         for row in range(numofy):
+    #             for column in range(numofx):
+    #                 self.ser.write(str.encode("G91\r\n"))
+    #                 if (row%2)==0:
+    #                     self.add_txt('working on the even row')
+    #                     if (column != 0):
+    #                         self.ser.write(str.encode("G01"+'X'+deltax+'\r\n'))
+    #                 if (row%2)!=0:
+    #                     self.add_txt('working on the odd row')
+    #                     if (column != 0):
+    #                         self.ser.write(str.encode("G01"+'X'+'-'+deltax+'\r\n'))
 
-                    cod = 0
-                    step = 0
+    #                 cod = 0
+    #                 step = 0
                     
-                    while ( step < steplimit) :
+    #                 while ( step < steplimit) :
                         
-                        self.ser.write(str.encode("G01"+'Z'+mov+'\r\n'))
+    #                     self.ser.write(str.encode("G01"+'Z'+mov+'\r\n'))
         	            
 
-                        cod = self.getthedistance()
-                        self.add_txt(str(cod))
+    #                     cod = self.getthedistance()
+    #                     self.add_txt(str(cod))
 
-                        #once the movement setp in one direciton +z or -z reach 15
-                        #the movement will be inversed.
-                        if (step == 15):
-                            if(mov == '0.1'):
-                                mov = '-0.1'
-                            else:
-                                mov = '0.1'
-                            print('inversed mov is' + mov)
-                            # self.ser.write(str.encode("G90\r\n"))
-                            # self.add_txt('back2Z ')    
-                            # self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
-                            # self.ser.write(str.encode("G91\r\n"))
+    #                     #once the movement setp in one direciton +z or -z reach 15
+    #                     #the movement will be inversed.
+    #                     if (step == 15):
+    #                         if(mov == '0.1'):
+    #                             mov = '-0.1'
+    #                         else:
+    #                             mov = '0.1'
+    #                         print('inversed mov is' + mov)
+    #                         # self.ser.write(str.encode("G90\r\n"))
+    #                         # self.add_txt('back2Z ')    
+    #                         # self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
+    #                         # self.ser.write(str.encode("G91\r\n"))
 
-                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 100):
-                            self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
-                            co,currentz,currentx,currenty = self.abspos()
-                            self.resultlx.append(str(cod))
-                            self.xcoordinats.append(currentx)
-                            self.zcoordinats.append(currentz)
-                            self.ycoordinats.append(currenty)
-                            disbigger = 4
+    #                     if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 100):
+    #                         self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
+    #                         co,currentz,currentx,currenty = self.abspos()
+    #                         self.resultlx.append(str(cod))
+    #                         self.xcoordinats.append(currentx)
+    #                         self.zcoordinats.append(currentz)
+    #                         self.ycoordinats.append(currenty)
+    #                         disbigger = 4
 
-                            zpos = str(float(currentz))
+    #                         zpos = str(float(currentz))
                                 
-                            self.add_txt('zpos now is   '+ zpos)
-                            steplimit = 2*disbigger/0.1
-                            self.add_txt('steplim now is ' + str(steplimit))
-                            step = steplimit
+    #                         self.add_txt('zpos now is   '+ zpos)
+    #                         steplimit = 2*disbigger/0.1
+    #                         self.add_txt('steplim now is ' + str(steplimit))
+    #                         step = steplimit
 
-                        step=step+1
-
-
-                    # self.ser.write(str.encode("G90\r\n"))
-                    # self.add_txt('back2Z ')    
-                    # self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
+    #                     step=step+1
 
 
-                if (row<numofy-1):
-                    self.ser.write(str.encode("G91\r\n"))
-                    self.add_txt('next y .....')
-                    self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
+    #                 # self.ser.write(str.encode("G90\r\n"))
+    #                 # self.add_txt('back2Z ')    
+    #                 # self.ser.write(str.encode("G01"+'Z'+zpos+'\r\n'))
 
 
-            print(self.xcoordinats)
-            print(self.resultlx)
-            print(self.zcoordinats)
+    #             if (row<numofy-1):
+    #                 self.ser.write(str.encode("G91\r\n"))
+    #                 self.add_txt('next y .....')
+    #                 self.ser.write(str.encode("G01"+'Y'+'-'+deltay+'\r\n'))
+
+
+    #         print(self.xcoordinats)
+    #         print(self.resultlx)
+    #         print(self.zcoordinats)
         
-        except serial.serialutil.PortNotOpenError:
-            self.add_txt('port closed')   
-        except AttributeError:
-                self.add_txt('no machine connected')
+    #     except serial.serialutil.PortNotOpenError:
+    #         self.add_txt('port closed')   
+    #     except AttributeError:
+    #             self.add_txt('no machine connected')
 
     
 
@@ -794,13 +813,13 @@ class tab3:
 
     #export the measurement result
     def exportdata(self):
-        category = ['Pointindex', 'X', 'Z', 'Readvalue'] 
+        category = ['Pointindex', 'X','Y','Z','Readvalue'] 
         ptidx =  []
         rows =  []
         for i in range(len(self.xcoordinats)):
             ptidx.append(i)
         for i in range(len(self.xcoordinats)):
-            rows.append([ptidx[i],self.xcoordinats[i], self.zcoordinats[i],self.resultlx[i]]) 
+            rows.append([ptidx[i],self.xcoordinats[i], self.ycoordinats[i],self.zcoordinats[i],self.resultlx[i]]) 
         with open('result.csv', 'w') as f: 
             write = csv.writer(f) 
             write.writerow(category) 
@@ -819,11 +838,10 @@ class tab3:
                 rows.append(row)
         for i in range(len(rows)):
             self.xcoordinats.append(rows[i][1])
-            self.zcoordinats.append(rows[i][2])
-            self.resultlx.append(rows[i][3])
-        if self.ycoordinats == [] :
-            for i in range(len(self.xcoordinats)):
-                self.ycoordinats.append(1)
+            self.ycoordinats.append(rows[i][2])
+            self.zcoordinats.append(rows[i][3])
+            self.resultlx.append(rows[i][4])
+
 
         self.findmax(self.zcoordinats)
         self.add_txt('data imported! ')
