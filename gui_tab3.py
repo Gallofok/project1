@@ -77,7 +77,7 @@ class tab3:
         # self.meachoice1 = Radiobutton(self.measureframe,text = 'type1(high to low)',value='type1',variable=self.meatype,command=self.funchoice)
         # self.meachoice2 = Radiobutton(self.measureframe,text = 'type2(low to high)',value='type2',variable=self.meatype,command=self.funchoice)
 
-        self.alongradiu = Button(self.measureframe,text='alongradiusmeasure',command = self.radiusmea,width=25)
+        self.alongradiu = Button(self.measureframe,text='alongradiusmeasure',command=lambda:threading.Thread(target=self.radiusmea).start(),width=25)
         self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess1).start(),width = 25)
         self.emstop = Button(self.measureframe,text='pause result export',command = self.exportdata,width=25)
         self.emstart = Button(self.measureframe,text='start result import',command = self.imoprtdata,width=25)
@@ -440,9 +440,6 @@ class tab3:
             deltax = str(deltax)
             deltay = str(deltay)
 
-            #xbegn and ybegn will set the movement wrt current position
-            self.ser.write(str.encode("G91\r\n"))
-            self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'Z'+self.zbegn.get()+'\r\n'))
             print('step lim is     '+str(steplimit))
             for row in range(numofy):
                 for column in range(numofx):
@@ -471,7 +468,7 @@ class tab3:
                             self.xcoordinats.append(currentx)
                             self.zcoordinats.append(currentz)
                             self.ycoordinats.append(currenty)
-                            dissmaller = 1
+                            dissmaller = 2
 
                             zpos = str(float(currentz)+dissmaller)
                              
@@ -508,16 +505,27 @@ class tab3:
     def radiusmea(self):
         radidx = self.findmax(self.zcoordinats)
         print('go to position ..'+ self.xcoordinats[radidx],self.ycoordinats[radidx],self.zcoordinats[radidx])
+        print(type(self.zcoordinats[radidx]))
+        self.xbegn.delete(0,END)
+        self.ybegn.delete(0,END)
+        self.zbegn.delete(0,END)
 
-        self.xbegn.insert(0,str(self.xcoordinats[radidx]))
-        self.ybegn.insert(0,str(self.ycoordinats[radidx]))
-        self.zbegn.insert(0,str(self.zcoordinats[radidx]))
+        self.xlen.delete(0,END)
+        self.ylen.delete(0,END)
+        self.xsample.delete(0,END)
+        self.ysample.delete(0,END)
+
+        self.xbegn.insert(0,self.xcoordinats[radidx])
+        self.ybegn.insert(0,self.ycoordinats[radidx])
+        self.zbegn.insert(0,str(float(self.zcoordinats[radidx])+1.5))
         self.xlen.insert(0,'10')
         self.ylen.insert(0,'20') 
         self.xsample.insert(0,'5')
         self.ysample.insert(0,'1')
+        self.ser.write(str.encode("G90\r\n"))
+        self.ser.write(str.encode("G01"+'X'+self.xbegn.get()+'Y'+self.ybegn.get()+'Z'+self.zbegn.get()+'\r\n'))
         self.measureprocess1()
-        return
+
 
 
     # def measureprocess2(self):    
