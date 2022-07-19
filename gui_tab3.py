@@ -78,7 +78,7 @@ class tab3:
 
         self.alongradiu = Button(self.measureframe,text='alongradiusmeasure',command=lambda:threading.Thread(target=self.radiusmea).start(),width=25)
         self.measure = Button(self.measureframe,text='measurebeginn',command=lambda:threading.Thread(target=self.measureprocess1).start(),width = 25)
-        self.emstop = Button(self.measureframe,text='pause result export',command = self.exportdata,width=25)
+        self.emstop = Button(self.measureframe,text=' result export',command = self.exportdata,width=25)
         self.emstart = Button(self.measureframe,text='start result import',command = self.importdata,width=25)
         
 
@@ -193,7 +193,7 @@ class tab3:
         #n_sample : desired length of autobuffer
         self.chr = chr_connection.CHR_connection('IP: 169.254.2.217',1)
         self.res = self.chr.send_command('$MMD 0')
-        self.n_sample = 100
+        self.n_sample = 200
     
         #it will show the real time information while measuring
         # g code can also be sent here
@@ -246,68 +246,136 @@ class tab3:
     
     #relative distance will be defined in this function and output in the chart
     def dzplot(self): 
-
+  
         window = Toplevel()
-        window.title('dz value')
-        fig = Figure(figsize = (8,5) ) 
-        
-        
-        # z = [i for i in zfloat]+[i for i in resultflot]
-
-        # z = [i-z[0] for i in zfloat]
-
-
+        window.title('result value')
+        fig = Figure(figsize = (8,5 )
+                    ) 
         x = [float(i) for i in self.xcoordinats]
-        y = [float(i) for i in self.ycoordinats]
-        resultflot = [float(i) for i in self.resultlx]
 
-        z = resultflot 
-        
-        plot1 = fig.add_subplot(111,projection='3d') 
+        z = [float(i) for i in self.zcoordinats] 
 
-        plot1.scatter3D(x, y, z)
-    
+        re = [float(i) for i in self.resultlx] 
 
+
+        for i in range(len(re)):
+            z[i]=z[i]-re[i]/1000 
+        print(z)
+        plot1 = fig.add_subplot(111) 
+        plot1.set_xlabel('x position')
+        plot1.set_ylabel('result')
+
+        plot1.plot(x,z,'.')
         canvas = FigureCanvasTkAgg(fig, 
                                 master = window)   
         canvas.draw() 
-    
-        
+
+
         canvas.get_tk_widget().pack() 
-    
-        
+
+
         toolbar = NavigationToolbar2Tk(canvas, 
                                     window) 
         toolbar.update()         
         canvas.get_tk_widget().pack() 
-    #absolt distance will be defined in this function and output in the chart
+
+    # def dzplot(self): 
+
+    #     window = Toplevel()
+    #     window.title('dz value')
+    #     fig = Figure(figsize = (8,5) ) 
+        
+        
+    #     # z = [i for i in zfloat]+[i for i in resultflot]
+
+    #     # z = [i-z[0] for i in zfloat]
+
+
+    #     x = [float(i) for i in self.xcoordinats]
+    #     y = [float(i) for i in self.ycoordinats]
+    #     resultflot = [float(i) for i in self.resultlx]
+
+    #     z = resultflot 
+        
+    #     plot1 = fig.add_subplot(111,projection='3d') 
+
+    #     plot1.scatter3D(x, y, z)
+    
+
+    #     canvas = FigureCanvasTkAgg(fig, 
+    #                             master = window)   
+    #     canvas.draw() 
+    
+        
+    #     canvas.get_tk_widget().pack() 
+    
+        
+    #     toolbar = NavigationToolbar2Tk(canvas, 
+    #                                 window) 
+    #     toolbar.update()         
+    #     canvas.get_tk_widget().pack() 
+
+    
     def zplot(self): 
   
         window = Toplevel()
         window.title('z value')
-        fig = Figure(figsize = (8,5 )) 
-
-                    
+        fig = Figure(figsize = (8,5 )
+                    ) 
         x = [float(i) for i in self.xcoordinats]
-        
-        y = [float(i) for i in self.ycoordinats] 
-        
-        z = [float(i) for i in self.zcoordinats] 
-        plot1 = fig.add_subplot(111, projection="3d")
 
-        plot1.scatter3D(x, y, z)
-    
+        z = [float(i) for i in self.zcoordinats] 
+
+
+        plot1 = fig.add_subplot(111) 
+        plot1.set_xlabel('x position')
+        plot1.set_ylabel('z position')
+        print(z)
+        plot1.plot(x,z,'.')
         canvas = FigureCanvasTkAgg(fig, 
                                 master = window)   
         canvas.draw() 
-    
-        
+
+
         canvas.get_tk_widget().pack() 
-    
+
+
         toolbar = NavigationToolbar2Tk(canvas, 
                                     window) 
         toolbar.update()         
         canvas.get_tk_widget().pack() 
+
+
+
+
+    #absolt distance will be defined in this function and output in the chart
+    # def zplot(self): 
+  
+    #     window = Toplevel()
+    #     window.title('z value')
+    #     fig = Figure(figsize = (8,5 )) 
+
+                    
+    #     x = [float(i) for i in self.xcoordinats]
+        
+    #     y = [float(i) for i in self.ycoordinats] 
+        
+    #     z = [float(i) for i in self.zcoordinats] 
+    #     plot1 = fig.add_subplot(111, projection="3d")
+
+    #     plot1.scatter3D(x, y, z)
+    
+    #     canvas = FigureCanvasTkAgg(fig, 
+    #                             master = window)   
+    #     canvas.draw() 
+    
+        
+    #     canvas.get_tk_widget().pack() 
+    
+    #     toolbar = NavigationToolbar2Tk(canvas, 
+    #                                 window) 
+    #     toolbar.update()         
+    #   canvas.get_tk_widget().pack() 
     #clean all the information on the label
     def cls(self):
         self.mytext.delete("1.0","end")
@@ -402,13 +470,13 @@ class tab3:
             if self.zbegn.get() == '':
                 self.zbegn.insert(0,'0')
             if self.xlen.get() == '':
-                self.xlen.insert(0,'10')
+                self.xlen.insert(0,'20')
             if self.ylen.get() == '':
                 self.ylen.insert(0,'20') 
             if self.xsample.get() == '':
-                self.xsample.insert(0,'1')
+                self.xsample.insert(0,'100')
             if self.ysample.get() == '':
-                self.ysample.insert(0,'5')
+                self.ysample.insert(0,'1')
             if self.zdis.get() == '':
                 self.zdis.insert(0,'15')
             #the integer will be used here   
@@ -457,7 +525,7 @@ class tab3:
                         cod = self.getthedistance()
                         self.add_txt(str(cod))
                         #once the cod reach the the range 60-260.it will be recorded as result
-                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 160) < 100):
+                        if (not self.nan_equal(cod,np.NaN) and np.abs(int(cod) - 150) < 50):
                             self.add_txt('distance is'+ ' : '+ str(cod)+ ' ' + 'um')
                             co,currentz,currentx,currenty = self.abspos()
                             self.resultlx.append(str(cod))
