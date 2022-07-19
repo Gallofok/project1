@@ -26,9 +26,9 @@ def getcounters(img,imgCounter):
             print(len(approx))
             x,y,w,h = cv2.boundingRect(approx)
             cv2.rectangle(imgCounter,(x,y),(x+w,y+h),(0,255,0),5)
-            cv2.putText(imgCounter,'points: ' + str(len(approx)),(x+w+20,y+20),cv2.FONT_HERSHEY_COMPLEX,.7,(0,255,0),2)
-            cv2.putText(imgCounter,'Area: ' + str(area),(x+w+20,y+45),cv2.FONT_HERSHEY_COMPLEX,.7,(0,255,0),2)
-
+            #cv2.putText(imgCounter,'points: ' + str(len(approx)),(x+w+20,y+20),cv2.FONT_HERSHEY_COMPLEX,.7,(0,255,0),2)
+            #cv2.putText(imgCounter,'Area: ' + str(area),(x+w+20,y+45),cv2.FONT_HERSHEY_COMPLEX,.7,(0,255,0),2)
+            cv2.putText(imgCounter,'Area: ' + str(area),(x+w//2,y+h//2),cv2.FONT_HERSHEY_COMPLEX,.7,(0,255,0),2)
 while True :
     _,frame = cap.read()
     fraCounter = frame.copy()
