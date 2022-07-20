@@ -12,14 +12,16 @@ cv2.namedWindow("Parameters")
 cv2.resizeWindow("Parameters",640,240)
 cv2.createTrackbar("Threshold1","Parameters",23,255,empty)
 cv2.createTrackbar("Threshold2","Parameters",20,255,empty)
-cv2.createTrackbar("Area","Parameters",5000,30000,empty)
+cv2.createTrackbar("Areamin","Parameters",0,30000,empty)
+cv2.createTrackbar("Areamax","Parameters",5000,30000,empty)
 
 def getcounters(img,imgCounter):
     counters,hierarchy = cv2.findContours(img,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-    areamin = cv2.getTrackbarPos("Area","Parameters")
+    areamin = cv2.getTrackbarPos("Areamin","Parameters")
+    areamax = cv2.getTrackbarPos("Areamax","Parameters")
     for cnt in counters:
         area = cv2.contourArea(cnt)
-        if area > areamin:
+        if area > areamin and area < areamax:
             cv2.drawContours(imgCounter,cnt,-1,(255,0,255),7)
             peri = cv2.arcLength(cnt,True)
             approx = cv2.approxPolyDP(cnt,0.02*peri,True)
